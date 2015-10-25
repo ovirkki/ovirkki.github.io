@@ -8,8 +8,12 @@ var shaOfPreviousGet;
 
 var completeData;
 
+function startAuth() {
+    window.open("https://github.com/login/oauth/authorize?scope=repo&client_id=85403ef9459db043e755");
+}
+
 function readFile() {
-    auth(getFile);
+    authJS();
     //getFile()
     /*$.ajax({
         url: dataFileAddress,
@@ -19,7 +23,7 @@ function readFile() {
 }
 
 function writeFile() {
-    auth(pushFile)
+    auth(pushFile);
 }
 
 function handleData(data) {
@@ -41,7 +45,7 @@ function getFirstFreeNoteId(notesObject) {
 function addNote(key, noteText) {
     console.log("Add note for " + key + ": " + noteText);
     if(completeData[key] === undefined) {
-        completeData[key] = {}
+        completeData[key] = {};
     }
     if(completeData[key].notes === undefined) {
         completeData[key].notes = {};
@@ -99,8 +103,8 @@ function renderData(data) {
     })
     .forEach(function(key) {
         console.log("foreach for key: " + key);
-        $(".pictureList").append(renderOnePicture(key, data[key].notes))
-    })
+        $(".pictureList").append(renderOnePicture(key, data[key].notes));
+    });
 }
 
 
@@ -123,7 +127,57 @@ function closeModal(event) {
     $content.empty();
 }
 
-function auth(callback) {
+function authJS() {
+    var url = "https://github.com/login/oauth/authorize?scope=repo&client_id=85403ef9459db043e755";
+    var request = new XMLHttpRequest();
+    var params = "action=something";
+    request.open('POST', url, true);
+    request.onreadystatechange = function() {if (request.readyState==4) alert("It worked!");};
+    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    //request.setRequestHeader("Content-length", params.length);
+    //request.setRequestHeader("Connection", "close");
+    request.send();
+}
+
+function auth() {
+    console.log("start auth");
+    var tok = githubCredentials.username + ':' + githubCredentials.passwd;
+    var hash = btoa(tok);
+    var authString = "Basic " + hash;
+    var data = {
+        "clientId": "85403ef9459db043e755",
+        "scopes": ["repo", "user"]
+    };
+    $.ajax
+      ({
+        type: "GET",
+        //url: "https://github.com/login/oauth/authorizations",
+        url: "https://github.com/login/oauth/authorize?scope=repo&client_id=85403ef9459db043e755",
+        contentType: 'application/x-www-form-urlencoded',
+        //dataType: 'jsonp',
+        //async: false,
+        //data: data,
+        xhrFields: {
+           mozSystem: false
+        },
+        beforeSend: function (xhr){
+            //xhr.setRequestHeader('Authorization', authString);
+        },
+        success: function (){
+            console.log("github auth success");
+            //callback();
+        },
+        error: function() {
+            console.log("github auth fail");
+        }
+    });
+}
+
+function getToken() {
+
+}
+
+function auth2(callback) {
     var tok = githubCredentials.username + ':' + githubCredentials.passwd;
     var hash = btoa(tok);
     var authString = "Basic " + hash;
@@ -195,7 +249,7 @@ function getFile() {
             console.log(JSON.stringify(data));
             shaOfPreviousGet = data.sha;
 
-            var decodedData = atob(data.content)
+            var decodedData = atob(data.content);
             console.log(JSON.stringify(decodedData));
         },
         error: function() {

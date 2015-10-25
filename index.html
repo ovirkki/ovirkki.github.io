@@ -47,10 +47,11 @@
 <button id="dataSave">Save data</button>
 <div class="dataBox"></div>
 <button class="addButton">Add new note</button>
+<a href="https://github.com/login/oauth/authorize?scope=user:email&client_id=85403ef9459db043e755">Click here</a> to begin!</a>
 <script>
 $(document).ready(function(){
     $("body").append(getNoteAddModalElements());
-    $("#dataLoad").click(readFile);
+    $("#dataLoad").click(startAuth);
     $("#dataSave").click(writeFile);
     $close.click(closeModal);
     $(".addButton").click(addNoteHandler);
