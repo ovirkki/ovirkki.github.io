@@ -9,6 +9,20 @@ var shaOfPreviousGet;
 var completeData;
 
 function startAuth() {
+    window.addEventListener('message', function (event) {
+        console.log("DATA: " + event.data);
+        var code = event.data;
+        /*$('#code').val(code);
+        // Step 5
+        $.get('token.php?code=' + code, function (access_token) {
+            // Step 7
+            $('#access_token').val(access_token);
+            $.getJSON('https://api.github.com/user?access_token=' + access_token, function (user) {
+                $('#username').val(user.login);
+            });
+        });*/
+    });
+
     window.open("https://github.com/login/oauth/authorize?scope=repo&client_id=85403ef9459db043e755");
 }
 
