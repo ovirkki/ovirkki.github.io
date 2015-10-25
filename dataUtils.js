@@ -1,5 +1,7 @@
 var dataFileAddress = "dataFile.json";
 
+var completeData;
+
 function readFile() {
     $.ajax({
         url: dataFileAddress,
@@ -19,6 +21,29 @@ function handleData(data) {
     renderData(data);
 }
 
+function getFirstFreeNoteId(notesObject) {
+    var idList = Object.keys(notesObject);
+    return idList.length + 1;
+}
+
+function addNote(key, noteText) {
+    console.log("Add note for " + key + ": " + noteText);
+    if(completeData[key] === undefined) {
+        completeData[key] = {}
+    }
+    if(completeData[key].notes === undefined) {
+        completeData[key].notes = {};
+    }
+    var noteId = getFirstFreeNoteId(completeData[key].notes);
+    completeData[key].notes[noteId] = {
+        freeText: noteText
+    };
+}
+
+function cancelNewNoteDialog() {
+    dialog.dialog( "close" );
+}
+
 function renderNotes(notes) {
     var noteListElement = $("<ul></ul>").addClass("notelist");
     var notesAsHtmlElementList = Object.keys(notes).map(function(noteId) {
@@ -26,17 +51,18 @@ function renderNotes(notes) {
         if(noteText === undefined) {
             return "Text not found";
         }
-        return "<li>" + noteText + "</li>";
+        var removeButton = $("<button>remove</button>").addClass("noteButton");
+        return $("<li>" + noteText + "</li>").append(removeButton);
     });
     return noteListElement.append(notesAsHtmlElementList);
 }
 
 function renderOnePicture(key, noteData) {
-    var pictureElement = $("<li></li>").addClass("pictureItem").attr("id", "picture-" + key).html(key);
+    var addButton = $("<button>add</button>").addClass("noteButton addButton").attr("id", "add-" + key);
+    var pictureElement = $("<li></li>").addClass("pictureItem").attr("id", "picture-" + key).html(key.toUpperCase());
+    pictureElement.append(addButton);
+
     pictureElement.append(renderNotes(noteData));
-    var htmlCode = "<div>test data</div>";
-    //$(elementId).html(htmlCode);
-    //return "key: " + key;
     return pictureElement;
 }
 
@@ -55,6 +81,13 @@ function renderData(data) {
     .forEach(function(key) {
         console.log("foreach for key: " + key);
         $(".pictureList").append(renderOnePicture(key, data[key].notes))
+    })
+    $(".addButton").click(function() {
+
+        var elementId = $(this).attr("id");
+        var pictureId = ""; //parse from elementId "add-a"
+        console.log("button presded: " + elementId);
+        $("#dialog-form").dialog("open");
     })
     //renderOnePicture(data, "#randoms .dataBox");
     //$("#randoms .dataBox").text(JSON.stringify(data));
