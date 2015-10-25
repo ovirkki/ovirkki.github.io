@@ -40,10 +40,6 @@ function addNote(key, noteText) {
     };
 }
 
-function cancelNewNoteDialog() {
-    dialog.dialog( "close" );
-}
-
 function renderNotes(notes) {
     var noteListElement = $("<ul></ul>").addClass("notelist");
     var notesAsHtmlElementList = Object.keys(notes).map(function(noteId) {
@@ -60,7 +56,7 @@ function renderNotes(notes) {
 function renderOnePicture(key, noteData) {
     var addButton = $("<button>add</button>").addClass("noteButton addButton").attr("id", "add-" + key);
     var pictureElement = $("<li></li>").addClass("pictureItem").attr("id", "picture-" + key).html(key.toUpperCase());
-    pictureElement.append(addButton);
+    //pictureElement.append(addButton);
 
     pictureElement.append(renderNotes(noteData));
     return pictureElement;
@@ -73,7 +69,18 @@ function isValidData(data) {
         Object.keys(data.notes).length >= 1;
 }
 
+function addNoteHandler() {
+    $modal.show();
+    $overlay.show();
+    //to be removed-->
+    addNote("6", "ei liikaa vertikaalia");
+    $modal.hide();
+    $overlay.hide();
+    renderData(completeData);
+}
+
 function renderData(data) {
+    $(".dataBox").empty();
     $(".dataBox").append("<ul class=\"pictureList\"></ul>");
     Object.keys(data).filter(function(key) {
         return isValidData(data[key]);
@@ -82,17 +89,29 @@ function renderData(data) {
         console.log("foreach for key: " + key);
         $(".pictureList").append(renderOnePicture(key, data[key].notes))
     })
-    $(".addButton").click(function() {
-
-        var elementId = $(this).attr("id");
-        var pictureId = ""; //parse from elementId "add-a"
-        console.log("button presded: " + elementId);
-        $("#dialog-form").dialog("open");
-    })
-    //renderOnePicture(data, "#randoms .dataBox");
-    //$("#randoms .dataBox").text(JSON.stringify(data));
 }
 
+
+function getNoteAddModalElements() {
+    $overlay = $('<div id="overlay"></div>');
+    $modal = $('<div id="modal"></div>');
+    $content = $('<div id="content"></div>');
+    $close = $('<a id="close" href="#">close</a>');
+
+    $modal.hide();
+    $overlay.hide();
+    $modal.append($content, $close);
+    return [$overlay, $modal];
+}
+
+function closeModal(event) {
+    event.preventDefault();
+    $modal.hide();
+    $overlay.hide();
+    $content.empty();
+}
+
+//-----------------------------------------------------
 function getFile() {
 	$.ajax({
     	url: "https://api.github.com/users/ovirkki",

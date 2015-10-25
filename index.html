@@ -5,34 +5,53 @@
 <script type="text/javascript", src="dataUtils.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<style>
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        opacity: 0.5;
+        filter: alpha(opacity=50);
+    }
+    #modal {
+    position:absolute;
+    background:url(tint20.png) 0 0 repeat;
+    background:rgba(0,0,0,0.2);
+    border-radius:14px;
+    padding:8px;
+    }
+
+    #content {
+        border-radius:8px;
+        background:#fff;
+        padding:20px;
+    }
+    /*#close {
+        position:absolute;
+        background:url(close.png) 0 0 no-repeat;
+        width:24px;
+        height:27px;
+        display:block;
+        text-indent:-9999px;
+        top:-7px;
+        right:-7px;
+    }*/
+</style>
+
 
 <h1>FS 4-way coaching data</h1>
 <button id="dataLoad">Load data</button>
 <div class="dataBox"></div>
-</div>
-<div id="dialog-form" title="Add new note">
-  <form>
-    <fieldset>
-      <label for="note">New data</label>
-      <input type="text" name="note" id="note" class="text ui-widget-content ui-corner-all"
-
-      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
-    </fieldset>
-  </form>
-</div>
+<button class="addButton">Add new note</button>
 <script>
 $(document).ready(function(){
+    $("body").append(getNoteAddModalElements());
     $("#dataLoad").click(readFile);
-    $("#dialog-form").dialog({
-        autoOpen: false,
-        modal : true,
-        show : "blind",
-        hide : "blind",
-        buttons: {
-            "Add note": addNote,
-            Cancel: cancelNewNoteDialog
-        }
-    });
+    $close.click(closeModal);
+    $(".addButton").click(addNoteHandler);
 });
 </script>
 </body>
