@@ -1,0 +1,24 @@
+{
+    "a": {
+        "notes": {
+            "1": {
+                "freeText": "Oton pitäisi tehdä sitä ja tätä",
+                "filterData": {
+                    "position": ["IC"]
+                }
+            },
+            "2": {
+                "freeText": "Antin pitäisi..."
+            }
+        }
+    },
+	"b": {
+        "notes": {
+            "1": {
+                "freeText": "b:ssä blahblah"
+            }
+        }
+        },
+	"c": {},
+    "8": {}
+}
