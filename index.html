@@ -44,12 +44,14 @@
 
 <h1>FS 4-way coaching data</h1>
 <button id="dataLoad">Load data</button>
+<button id="dataSave">Save data</button>
 <div class="dataBox"></div>
 <button class="addButton">Add new note</button>
 <script>
 $(document).ready(function(){
     $("body").append(getNoteAddModalElements());
     $("#dataLoad").click(readFile);
+    $("#dataSave").click(writeFile);
     $close.click(closeModal);
     $(".addButton").click(addNoteHandler);
 });

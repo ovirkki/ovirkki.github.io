@@ -4,16 +4,22 @@ var githubCredentials = {
     passwd: "itsar11"
 };
 
+var shaOfPreviousGet;
+
 var completeData;
 
 function readFile() {
-    auth();
-    getFile()
+    auth(getFile);
+    //getFile()
     /*$.ajax({
         url: dataFileAddress,
         dataType: "json",
         success: handleData
     });*/
+}
+
+function writeFile() {
+    auth(pushFile)
 }
 
 function handleData(data) {
@@ -117,7 +123,7 @@ function closeModal(event) {
     $content.empty();
 }
 
-function auth() {
+function auth(callback) {
     var tok = githubCredentials.username + ':' + githubCredentials.passwd;
     var hash = btoa(tok);
     var authString = "Basic " + hash;
@@ -133,6 +139,7 @@ function auth() {
         },
         success: function (){
             console.log("github auth success");
+            callback();
         },
         failure: function() {
             console.log("github auth fail");
@@ -141,40 +148,64 @@ function auth() {
 }
 
 function pushFile() {
-    var url = "https://api.github.com/repos/ovirkki/contents/ovirkki.github.io";
-    var codedContent = btoa(JSON.stringify(completeData));
+    var data = {
+        test: "data"
+    };
+    var url = "https://api.github.com/repos/ovirkki/ovirkki.github.io/contents/dataFile.json";
+    var codedContent = btoa(JSON.stringify(data));
     var pushData = {
+        "path": "dataFile.json",
         "message": "Data file update",
-        "committer": {
+        /*"committer": {
             "name": "Otto Virkki",
             "email": "otto.virkki@gmail.com"
-        },
+        },*/
         "content": codedContent,
-        "sha": "329688480d39049927147c162b9d2deaf885005f"
-    }
+        "sha": shaOfPreviousGet
+    };
+    $.ajax
+      ({
+        type: "PUT",
+        contentType: "application/json",
+        url: url,
+        dataType: 'json',
+        //async: false,
+        data: pushData,
+        success: function(data) {
+            console.log("github put success");
+        },
+        error: function(xhr) {
+            console.log("github put fail");
+            console.log(xhr.responseText);
+        }
+    });
 }
 
 function getFile() {
-    var url = "https://api.github.com/repos/ovirkki/contents/ovirkki.github.io";
+    console.log("start getting");
+    var url = "https://api.github.com/repos/ovirkki/ovirkki.github.io/contents/dataFile.json";
     $.ajax
       ({
         type: "GET",
         url: url,
         dataType: 'json',
         async: false,
-        data: '{}',
-        success: function (data){
+        success: function(data) {
             console.log("github get success");
             console.log(JSON.stringify(data));
+            shaOfPreviousGet = data.sha;
+
+            var decodedData = atob(data.content)
+            console.log(JSON.stringify(decodedData));
         },
-        failure: function() {
+        error: function() {
             console.log("github get fail");
         }
     });
 }
 
 //-----------------------------------------------------
-function getFile() {
+/*function getFile() {
 	$.ajax({
     	url: "https://api.github.com/users/ovirkki",
     	//type: "POST",
@@ -193,4 +224,4 @@ function getFile() {
         	alert(xhr.responseText);
      	}
  	});
-}
+}*/
