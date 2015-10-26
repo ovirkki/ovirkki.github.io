@@ -1,13 +1,19 @@
 var dataFileAddress = "dataFile.json";
+var githubCredentials = {
+    username: "ovirkki",
+    passwd: "itsar11"
+};
 
 var completeData;
 
 function readFile() {
-    $.ajax({
+    auth();
+    getFile()
+    /*$.ajax({
         url: dataFileAddress,
         dataType: "json",
         success: handleData
-    });
+    });*/
 }
 
 function handleData(data) {
@@ -109,6 +115,62 @@ function closeModal(event) {
     $modal.hide();
     $overlay.hide();
     $content.empty();
+}
+
+function auth() {
+    var tok = githubCredentials.username + ':' + githubCredentials.passwd;
+    var hash = btoa(tok);
+    var authString = "Basic " + hash;
+    $.ajax
+      ({
+        type: "GET",
+        url: "https://api.github.com",
+        dataType: 'json',
+        async: false,
+        data: '{}',
+        beforeSend: function (xhr){
+            xhr.setRequestHeader('Authorization', authString);
+        },
+        success: function (){
+            console.log("github auth success");
+        },
+        failure: function() {
+            console.log("github auth fail");
+        }
+    });
+}
+
+function pushFile() {
+    var url = "https://api.github.com/repos/ovirkki/contents/ovirkki.github.io";
+    var codedContent = btoa(JSON.stringify(completeData));
+    var pushData = {
+        "message": "Data file update",
+        "committer": {
+            "name": "Otto Virkki",
+            "email": "otto.virkki@gmail.com"
+        },
+        "content": codedContent,
+        "sha": "329688480d39049927147c162b9d2deaf885005f"
+    }
+}
+
+function getFile() {
+    var url = "https://api.github.com/repos/ovirkki/contents/ovirkki.github.io";
+    $.ajax
+      ({
+        type: "GET",
+        url: url,
+        dataType: 'json',
+        async: false,
+        data: '{}',
+        success: function (data){
+            console.log("github get success");
+            console.log(JSON.stringify(data));
+        },
+        failure: function() {
+            console.log("github get fail");
+        }
+    });
 }
 
 //-----------------------------------------------------
