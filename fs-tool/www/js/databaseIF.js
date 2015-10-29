@@ -2,7 +2,7 @@ define(["gapiClient", "app/renderer", "bluebird", "underscore"], function(gapiCl
 
     var CLIENT_ID = '709524761846-8htbrhrd9gvt6dkb1m1j13n1hha68b61.apps.googleusercontent.com';
     var SCOPES = ['https://www.googleapis.com/auth/drive'];
-    var DATAFILENAME = "fsDataFile.json"
+    var DATAFILENAME = "fsDataFile.json";
     var FILE_ID = "0B3jVRf_xGpuyTF9KeXBJWEtCSDg";
 
     var downloadedData;
@@ -11,7 +11,7 @@ define(["gapiClient", "app/renderer", "bluebird", "underscore"], function(gapiCl
         return Promise.try(function() {
             return gapi.auth.authorize({
                 client_id: CLIENT_ID, scope: SCOPES, immediate: true
-            })
+            });
         })
         .then(function(authResult) {
             if (!authResult || authResult.error) {
@@ -22,7 +22,7 @@ define(["gapiClient", "app/renderer", "bluebird", "underscore"], function(gapiCl
                     if (!authResult || authResult.error) {
                         return Promise.reject("Auth failed! " + authResult? authResult.error : "unknown reason");
                     }
-                })
+                });
             }
         })
         .catch(function(error) {
@@ -52,7 +52,7 @@ define(["gapiClient", "app/renderer", "bluebird", "underscore"], function(gapiCl
     function downloadData() {
 
         return Promise.try(function() {
-            return gapi.client.load('drive', 'v2')
+            return gapi.client.load('drive', 'v2');
         })
         .then(function() {
             var request = gapi.client.request({
@@ -66,11 +66,7 @@ define(["gapiClient", "app/renderer", "bluebird", "underscore"], function(gapiCl
                     //downloadedData = data;
                     resolve(data);
                 });
-            })
-            .then(function(data2) {
-                console.log("data2: " + JSON.stringify(data2));
-                return data2;
-            })
+            });
         });
     }
 
@@ -87,9 +83,8 @@ define(["gapiClient", "app/renderer", "bluebird", "underscore"], function(gapiCl
             .then(function() {
                 return downloadData();
             })
-            .then(function(data) {
-                console.log("data: " + JSON.stringify(downloadedData));
-                renderer.renderData(downloadedData);
+            .then(function(fsData) {
+                renderer.renderData(fsData);
             });
         }
     };
