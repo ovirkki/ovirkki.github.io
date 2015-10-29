@@ -5,10 +5,10 @@ requirejs.config({
     }
 });
 
-requirejs(["jquery", "app/renderer"],
-    function($, renderer) {
+requirejs(["jquery", "app/eventHandler"],
+    function($, eventHandler) {
         $(document).ready(function() {
-            renderer.initialize();
+            eventHandler.initialize();
         });
     }
 );

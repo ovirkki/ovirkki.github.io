@@ -1,10 +1,8 @@
-define(["app/databaseIF"], function(databaseIF) {
+define([], function() {
 
     return {
-        initialize: function() {
-            //init page
-            $("#dataLoad").click(databaseIF.downloadFile);
-
+        renderData: function(data) {
+            $("#output").text(JSON.stringify(data));
         }
     };
 });
