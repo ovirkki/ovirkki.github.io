@@ -47,6 +47,9 @@ define(["app/databaseIF", "app/renderer", "underscore", "bluebird"], function(da
             });
 
         },
+        uploadData: function() {
+            databaseIF.uploadData(renderedData);
+        },
         addNote: function() {
             var key = "a";
             var noteText = "testiteksti";

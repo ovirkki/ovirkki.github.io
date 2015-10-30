@@ -40,6 +40,14 @@ define(["gapiClient", "bluebird", "underscore"], function(gapiClient, Promise, _
         return fileData.id;
     }
 
+    function gapiRequestPromise(request) {
+        return new Promise(function(resolve) {
+            request.execute(function(data) {
+                resolve(data);
+            });
+        });
+    }
+
     function downloadDataFromGDrive() {
         return gapi.client.load('drive', 'v2')
         .then(function() {
@@ -48,12 +56,25 @@ define(["gapiClient", "bluebird", "underscore"], function(gapiClient, Promise, _
                 'method': 'GET',
                 'params': {'alt': 'media'},
             });
-            return new Promise(function(resolve) {
-                request.execute(function(data) {
-                    console.log("data1: " + JSON.stringify(data));
-                    resolve(data);
-                });
+            return gapiRequestPromise(request);
+        });
+    }
+
+    function uploadDataToGDrive(data) {
+        console.log("upload to google drive: " + JSON.stringify(data));
+        return gapi.client.load("drive", "v2")
+        .then(function() {
+            var base64Data = btoa(JSON.stringify(data));
+            var request = gapi.client.request({
+                'path': '/upload/drive/v2/files/' + FILE_ID,
+                'method': 'PUT',
+                'params': {'uploadType': 'media'},
+                'headers': {
+                    "Content-Encoding": "base64"
+                },
+                'body': base64Data
             });
+            return gapiRequestPromise(request);
         });
     }
 
@@ -65,10 +86,17 @@ define(["gapiClient", "bluebird", "underscore"], function(gapiClient, Promise, _
 
     return {
         downloadData: function() {
-            console.log("Auth starting2");
             return gDriveAuthorize()
             .then(function() {
                 return downloadDataFromGDrive();
+            });
+        },
+        uploadData: function(data) {
+            console.log("upload requested");
+            return gDriveAuthorize()
+            .then(function() {
+                console.log("here");
+                return uploadDataToGDrive(data);
             });
         }
     };

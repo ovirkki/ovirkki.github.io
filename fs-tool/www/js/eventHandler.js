@@ -4,6 +4,7 @@ define(["app/dataHandler"], function(dataHandler) {
         initialize: function() {
             $("#dataLoad").click(dataHandler.loadData);
             $("#addNote").click(dataHandler.addNote);
+            $("#dataUpload").click(dataHandler.uploadData);
         }
     };
 });

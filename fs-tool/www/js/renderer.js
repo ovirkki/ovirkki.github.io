@@ -1,36 +1,31 @@
 define(["underscore"], function(_) {
 
-    function getNoteListElement(formationData, formationKey) {
-        var noteData = formationData[formationKey].notes;
+    function getNoteDataElement(formationData, formationKey) {
+        var allNotes = formationData[formationKey].notes;
         console.log("formationData: " + JSON.stringify(formationData));
-        var noteListTableElement = $("<td></td>").append($("<table></table>").addClass("noteTable"));
-        if(!_.isEmpty(noteData)) {
-
-            var notesAsTableRows = Object.keys(noteData).map(function(noteId) {
-                var noteTableRowElement = $("<tr></tr>");
-                var noteText = noteData[noteId].freeText;
-                if(noteText === undefined) {
-                    return "Text not found";
-                }
-                return noteTableRowElement.append(generateNoteTableItem(noteText));
+        var notesTableElement = $("<table></table>").addClass("noteTable").attr("id", "notetable-" + formationKey);
+        if(!_.isEmpty(allNotes)) {
+            var notesAsTableRows = _.values(allNotes).map(function(noteData) {
+                return generateNoteTableRow(noteData.freeText);
             });
-            return noteListTableElement.append(notesAsTableRows);
+            return notesTableElement.append(notesAsTableRows);
         }
-        return noteListTableElement;
+        return notesTableElement;
     }
 
-    function renderOnePicture(key, noteData) {
-        var addButton = $("<button>add</button>").addClass("noteButton addButton").attr("id", "add-" + key);
-        var pictureElement = $("<li></li>").addClass("pictureItem").attr("id", "picture-" + key).html(key.toUpperCase());
-        //pictureElement.append(addButton);
-
-        pictureElement.append(renderNotes(noteData));
-        return pictureElement;
+    function generateNoteTableRow(noteText) {
+        var noteTableRowElement = $("<tr></tr>");
+        if(noteText === undefined) {
+            return "Text not found";
+        }
+        return noteTableRowElement.append($("<td>" + noteText + "</td>")).append($("<td></td>").append(generateNoteButtons));
     }
 
-    function generateNoteTableItem(noteText) {
+    function generateNoteButtons(noteText) {
+        var relevanceCheck = ""; //checkpoint
         var removeButton = $("<button>remove</button>").addClass("noteButton");
-        return $("<td>" + noteText + "</td>").append(removeButton);
+        var updateButton = $("<button>update</button>").addClass("noteButton");
+        return $("<div></div>").append(updateButton).append(removeButton);
     }
 
     return {
@@ -39,14 +34,14 @@ define(["underscore"], function(_) {
             $formationTable = $("<table></table>");
             $formationTable.append(_.keys(data).map(function(key) {
                 var rowElement = $("<tr></tr>").addClass("row").attr("id", "row-" + key);
-                rowElement.append($("<td>" + key + "</td>").addClass("formationCode"));
-                rowElement.append(getNoteListElement(data, key));
+                rowElement.append($("<td>" + key.toUpperCase() + "</td>").addClass("formationCode"));
+                rowElement.append($("<td></td>").append(getNoteDataElement(data, key)));
                 return rowElement;
             }));
             $("#output").append($formationTable);
         },
         addNewNote: function(key, text) {
-            $("#notelist-" + key).append(generateNoteListItem(text));
+            $("#notetable-" + key).append(generateNoteTableRow(text));
         }
     };
 });
