@@ -3,19 +3,20 @@ define(["underscore"], function(_) {
     function getNoteListElement(formationData, formationKey) {
         var noteData = formationData[formationKey].notes;
         console.log("formationData: " + JSON.stringify(formationData));
-        var noteListTableElement = $("<td></td>");
-        var noteListElement = $("<ul></ul>").addClass("notelist").attr("id", "notelist-" + formationKey);
+        var noteListTableElement = $("<td></td>").append($("<table></table>").addClass("noteTable"));
         if(!_.isEmpty(noteData)) {
-            var notesAsHtmlElementList = Object.keys(noteData).map(function(noteId) {
+
+            var notesAsTableRows = Object.keys(noteData).map(function(noteId) {
+                var noteTableRowElement = $("<tr></tr>");
                 var noteText = noteData[noteId].freeText;
                 if(noteText === undefined) {
                     return "Text not found";
                 }
-                return generateNoteListItem(noteText);
+                return noteTableRowElement.append(generateNoteTableItem(noteText));
             });
-            noteListElement.append(notesAsHtmlElementList);
+            return noteListTableElement.append(notesAsTableRows);
         }
-        return noteListTableElement.append(noteListElement);
+        return noteListTableElement;
     }
 
     function renderOnePicture(key, noteData) {
@@ -27,9 +28,9 @@ define(["underscore"], function(_) {
         return pictureElement;
     }
 
-    function generateNoteListItem(noteText) {
+    function generateNoteTableItem(noteText) {
         var removeButton = $("<button>remove</button>").addClass("noteButton");
-        return $("<li>" + noteText + "</li>").append(removeButton);
+        return $("<td>" + noteText + "</td>").append(removeButton);
     }
 
     return {
