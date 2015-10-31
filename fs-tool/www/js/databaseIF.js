@@ -12,19 +12,14 @@ define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer
                 client_id: CLIENT_ID, scope: SCOPES, immediate: true
             });
         })
-        .then(function(authResult) {
-            if (!authResult || authResult.error) {
-                return gapi.auth.authorize({
-                    client_id: CLIENT_ID, scope: SCOPES, immediate: false
-                })
-                .then(function(authResult) {
-                    if (!authResult || authResult.error) {
-                        return Promise.reject("Auth failed! " + authResult? authResult.error : "unknown reason");
-                    }
-                });
-            } else {
-                renderer.updateStatusBar("Authorization successful");
-            }
+        .catch(function() {
+            renderer.updateStatusBar("Log in needed");
+            return gapi.auth.authorize({
+                client_id: CLIENT_ID, scope: SCOPES, immediate: false
+            })
+        })
+        .then(function() {
+            renderer.updateStatusBar("Authorization successful");
         })
         .catch(function(error) {
             renderer.updateStatusBar("Authorization failed");
@@ -82,12 +77,6 @@ define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer
         });
     }
 
-    function handleData(resp) {
-        console.log("resp: " + JSON.stringify(resp));
-        //var fileList = resp.items;
-        //var fileId = getFileId(resp.items);
-    }
-
     return {
         downloadData: function() {
             return gDriveAuthorize()
@@ -96,11 +85,7 @@ define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer
             })
             .tap(function() {
                 renderer.updateStatusBar("Download completed successfully.");
-            })
-            .catch(function(error) {
-                renderer.updateStatusBar("Download failed.");
-                console.log("download fail: " + error);
-            });;
+            });
         },
         uploadData: function(data) {
             return gDriveAuthorize()
@@ -110,10 +95,6 @@ define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer
             })
             .tap(function() {
                 renderer.updateStatusBar("Upload completed successfully.");
-            })
-            .catch(function(error) {
-                renderer.updateStatusBar("Upload failed.");
-                console.log("upload fail: " + error);
             });
         }
     };

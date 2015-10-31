@@ -10,16 +10,17 @@ define(["underscore"], function(_) {
 
     function getNoteDataElement(formationData, formationKey) {
         console.log("get note data for " + formationKey);
-        var allNotes = formationData[formationKey].notes;
+        //var allNotes = formationData[formationKey].notes;
         console.log("formationData: " + JSON.stringify(formationData));
         var $notesTableElement = $("<table></table>").addClass("noteTable").attr("id", "notetable-" + formationKey.toUpperCase());
-        if(!_.isEmpty(allNotes)) {
-            var notesAsTableRows = _.values(allNotes).map(function(noteData) {
+        if(_.isEmpty(formationData[formationKey]) || _.isEmpty(formationData[formationKey].notes)) {
+            return $notesTableElement.addClass("noData");
+        } else {
+            var notesAsTableRows = _.values(formationData[formationKey].notes).map(function(noteData) {
                 return generateNoteTableRow(noteData.freeText);
             });
             return $notesTableElement.append(notesAsTableRows);
         }
-        return $notesTableElement;
     }
 
     function generateNoteTableRow(noteText) {
@@ -46,10 +47,10 @@ define(["underscore"], function(_) {
         var formationList = RANDOMS.concat(BLOCKS_A); //TODO select blocks according to checkbox for inter/open
 
         var $formationRows = formationList.map(function(key) {
-            var rowElement = $("<tr></tr>").addClass("formationRow").attr("id", "row-" + key);
-            rowElement.append($("<td>" + key.toUpperCase() + "</td>").addClass("formationCode"));
-            rowElement.append($("<td></td>").addClass("noteData"));
-            return rowElement;
+            var $rowElement = $("<tr></tr>").addClass("formationRow").attr("id", "row-" + key);
+            $rowElement.append($("<td>" + key.toUpperCase() + "</td>").addClass("formationCode"));
+            $rowElement.append($("<td></td>").addClass("noteData"));
+            return $rowElement;
         })
         $("#dataTable").append($formationRows);
     }
@@ -63,7 +64,7 @@ define(["underscore"], function(_) {
             console.log(JSON.stringify(data));
             initRows();
             _.keys(data).forEach(function(key) {
-                $("#row-" + key.toUpperCase() + " .noteData").append(getNoteDataElement(data, key));
+                $("#row-" + key.toUpperCase() + " .noteData").append(getNoteDataElement(data, key)); //add some check that if row(formation) not in data then it is nodata
             })
         },
         addNewNote: function(key, text) {
@@ -73,6 +74,13 @@ define(["underscore"], function(_) {
             clearStatusBar();
             $(".statusbar").text(text);
         },
-        clearStatusBar: clearStatusBar
+        clearStatusBar: clearStatusBar,
+        filterData: function() {
+            console.log("clicked");
+            /*$(".noData").each(function(index, row) {
+                $(row + ".noData")
+            });*/
+            $(".noData").closest(".formationRow").hide();
+        }
     };
 });

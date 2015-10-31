@@ -40,12 +40,15 @@ define(["app/databaseIF", "app/renderer", "underscore", "bluebird"], function(da
 
             })
             .catch(function(err) {
-                console.log("ERR: " + err);
+                renderer.updateStatusBar("Download failed.");
             });
 
         },
         uploadData: function() {
-            databaseIF.uploadData(renderedData);
+            databaseIF.uploadData(renderedData)
+            .catch(function() {
+                renderer.updateStatusBar("Upload failed.");
+            });
         },
         addNote: function() {
             var key = "a";
