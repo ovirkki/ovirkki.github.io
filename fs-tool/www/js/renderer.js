@@ -1,16 +1,25 @@
 define(["underscore"], function(_) {
 
+    var RANDOMS = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q"];
+    var BLOCKS_AAA = _.range(1, 22).map(convertToString);
+    var BLOCKS_A = [2, 4, 6, 7, 8, 9, 19, 21].map(convertToString);
+
+    function convertToString(item) {
+        return item.toString();
+    }
+
     function getNoteDataElement(formationData, formationKey) {
+        console.log("get note data for " + formationKey);
         var allNotes = formationData[formationKey].notes;
         console.log("formationData: " + JSON.stringify(formationData));
-        var notesTableElement = $("<table></table>").addClass("noteTable").attr("id", "notetable-" + formationKey);
+        var $notesTableElement = $("<table></table>").addClass("noteTable").attr("id", "notetable-" + formationKey.toUpperCase());
         if(!_.isEmpty(allNotes)) {
             var notesAsTableRows = _.values(allNotes).map(function(noteData) {
                 return generateNoteTableRow(noteData.freeText);
             });
-            return notesTableElement.append(notesAsTableRows);
+            return $notesTableElement.append(notesAsTableRows);
         }
-        return notesTableElement;
+        return $notesTableElement;
     }
 
     function generateNoteTableRow(noteText) {
@@ -28,20 +37,42 @@ define(["underscore"], function(_) {
         return $("<div></div>").append(updateButton).append(removeButton);
     }
 
+    function clearStatusBar() {
+        $(".statusbar").empty();
+    }
+
+    function initRows() {
+
+        var formationList = RANDOMS.concat(BLOCKS_A); //TODO select blocks according to checkbox for inter/open
+
+        var $formationRows = formationList.map(function(key) {
+            var rowElement = $("<tr></tr>").addClass("formationRow").attr("id", "row-" + key);
+            rowElement.append($("<td>" + key.toUpperCase() + "</td>").addClass("formationCode"));
+            rowElement.append($("<td></td>").addClass("noteData"));
+            return rowElement;
+        })
+        $("#dataTable").append($formationRows);
+    }
+
     return {
+        initDataTable: function() {
+            initRows();
+        },
+
         renderData: function(data) {
             console.log(JSON.stringify(data));
-            $formationTable = $("<table></table>");
-            $formationTable.append(_.keys(data).map(function(key) {
-                var rowElement = $("<tr></tr>").addClass("row").attr("id", "row-" + key);
-                rowElement.append($("<td>" + key.toUpperCase() + "</td>").addClass("formationCode"));
-                rowElement.append($("<td></td>").append(getNoteDataElement(data, key)));
-                return rowElement;
-            }));
-            $("#output").append($formationTable);
+            initRows();
+            _.keys(data).forEach(function(key) {
+                $("#row-" + key.toUpperCase() + " .noteData").append(getNoteDataElement(data, key));
+            })
         },
         addNewNote: function(key, text) {
             $("#notetable-" + key).append(generateNoteTableRow(text));
-        }
+        },
+        updateStatusBar: function(text) {
+            clearStatusBar();
+            $(".statusbar").text(text);
+        },
+        clearStatusBar: clearStatusBar
     };
 });

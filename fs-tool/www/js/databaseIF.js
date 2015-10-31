@@ -1,4 +1,4 @@
-define(["gapiClient", "bluebird", "underscore"], function(gapiClient, Promise, _) {
+define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer) {
 
     var CLIENT_ID = '709524761846-8htbrhrd9gvt6dkb1m1j13n1hha68b61.apps.googleusercontent.com';
     var SCOPES = ['https://www.googleapis.com/auth/drive'];
@@ -6,6 +6,7 @@ define(["gapiClient", "bluebird", "underscore"], function(gapiClient, Promise, _
     var FILE_ID = "0B3jVRf_xGpuyTF9KeXBJWEtCSDg";
 
     function gDriveAuthorize() {
+        renderer.updateStatusBar("Authorizing to database");
         return Promise.try(function() {
             return gapi.auth.authorize({
                 client_id: CLIENT_ID, scope: SCOPES, immediate: true
@@ -22,10 +23,11 @@ define(["gapiClient", "bluebird", "underscore"], function(gapiClient, Promise, _
                     }
                 });
             } else {
-                console.log("auth success");
+                renderer.updateStatusBar("Authorization successful");
             }
         })
         .catch(function(error) {
+            renderer.updateStatusBar("Authorization failed");
             console.log("auth failed, error cause: " + error);
             throw error;
         });
@@ -49,6 +51,7 @@ define(["gapiClient", "bluebird", "underscore"], function(gapiClient, Promise, _
     }
 
     function downloadDataFromGDrive() {
+        renderer.updateStatusBar("Downloading data");
         return gapi.client.load('drive', 'v2')
         .then(function() {
             var request = gapi.client.request({
@@ -62,6 +65,7 @@ define(["gapiClient", "bluebird", "underscore"], function(gapiClient, Promise, _
 
     function uploadDataToGDrive(data) {
         console.log("upload to google drive: " + JSON.stringify(data));
+        renderer.updateStatusBar("Uploading data");
         return gapi.client.load("drive", "v2")
         .then(function() {
             var base64Data = btoa(JSON.stringify(data));
@@ -89,14 +93,27 @@ define(["gapiClient", "bluebird", "underscore"], function(gapiClient, Promise, _
             return gDriveAuthorize()
             .then(function() {
                 return downloadDataFromGDrive();
-            });
+            })
+            .tap(function() {
+                renderer.updateStatusBar("Download completed successfully.");
+            })
+            .catch(function(error) {
+                renderer.updateStatusBar("Download failed.");
+                console.log("download fail: " + error);
+            });;
         },
         uploadData: function(data) {
-            console.log("upload requested");
             return gDriveAuthorize()
             .then(function() {
                 console.log("here");
                 return uploadDataToGDrive(data);
+            })
+            .tap(function() {
+                renderer.updateStatusBar("Upload completed successfully.");
+            })
+            .catch(function(error) {
+                renderer.updateStatusBar("Upload failed.");
+                console.log("upload fail: " + error);
             });
         }
     };

@@ -5,7 +5,6 @@ define(["app/databaseIF", "app/renderer", "underscore", "bluebird"], function(da
 
     function deepCloneObject(source) {
         var asString = JSON.stringify(source);
-        console.log("as string: " + asString);
         return JSON.parse(asString);
         //return JSON.parse(JSON.stringify(source));
     }
@@ -33,10 +32,8 @@ define(["app/databaseIF", "app/renderer", "underscore", "bluebird"], function(da
 
     return {
         loadData: function() {
-
             databaseIF.downloadData()
             .then(function(data) {
-                console.log("datahandler data: " + JSON.stringify(data));
                 downloadedData = data;
                 renderedData = deepCloneObject(downloadedData);
                 renderer.renderData(renderedData);
