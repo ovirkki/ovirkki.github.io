@@ -5,9 +5,10 @@ requirejs.config({
     }
 });
 
-requirejs(["jquery", "gapiClient", "app/eventHandler"],
-    function($, gapiClient, eventHandler) {
+requirejs(["jquery", "gapiClient", "app/eventHandler", "app/renderer"],
+    function($, gapiClient, eventHandler, renderer) {
         $(document).ready(function() {
+            renderer.initialize();
             eventHandler.initialize();
         });
     }

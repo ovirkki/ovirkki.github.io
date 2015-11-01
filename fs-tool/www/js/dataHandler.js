@@ -53,6 +53,7 @@ define(["app/databaseIF", "app/renderer", "underscore", "bluebird"], function(da
         addNote: function() {
             var key = "a";
             var noteText = "testiteksti";
+            renderer.openNoteAddModal();
             addNote(key, noteText);
         },
         getRenderedData: function() {

@@ -62,7 +62,35 @@ define(["underscore"], function(_) {
         $("#dataTable").append($formationRows);
     }
 
+    function initNoteAddModalElements() {
+        var $content = $('<div id="newNoteQuery"></div>');
+        var $close = $('<a id="close" href="#">close</a>');
+
+        $("#modal").hide();
+        $("#overlay").hide();
+        $("#modal").append($content, $close);
+    }
+
+    function closeModal(event) {
+        event.preventDefault();
+        $("#modal").hide();
+        $("#overlay").hide();
+        $("#newNoteQuery").empty();
+    }
+
+    function generateNewNoteForm() {
+        var $form = $("<form></form>").attr("id", "addNoteForm");
+        var $textField = $('<label for="noteDescription">Add note:</label>' +
+                '<input type="text" name="noteDescription" class="txtfield">');
+        var $submit = $('<input type="submit" value="Add note">');
+        return $form.append($textField, $submit);
+    }
+
     return {
+        initialize: function() {
+            initNoteAddModalElements();
+        },
+
         initDataTable: function() {
             initRows();
         },
@@ -93,6 +121,11 @@ define(["underscore"], function(_) {
         },
         unfilterData: function() {
             $(".formationRow").show();
+        },
+        openNoteAddModal: function() {
+            $("#newNoteQuery").append(generateNewNoteForm());
+            $("#addNewNoteModal").show();
+            $("#overlay").show();
         }
     };
 });
