@@ -12,14 +12,39 @@
         <div class="statusbar"></div>
         <div class="functionButtons">
             <button id="dataLoad">Load data</button>
-            <button id="addNote">Add note for random A</button>
-            <button id="dataUpload">Upload data</button>
+            <button id="addNote" class="requiresData">Add note for random or block</button>
+            <button id="dataUpload" class="requiresData">Upload data</button>
             <label><input type="checkbox" id="dataFiltering">Show only relevant</label>
+            <!--<label for="classSelector"></label>-->
+            <form>
+                <input type="radio" name="classSelector" class="classRadio" value="intermediate" checked>A (intermediate)<br>
+                <input type="radio" name="classSelector" class="classRadio" value="open">AAA (open)
+            </form>
+            <!--<select name="formation">
+              <option value="intermediate">A (intermediate)</option>
+              <option value="open">AAA (open)</option>
+            </select>-->
         </div>
         <div id="output">
             <table id="dataTable"></table>
         </div>
         <div id="overlay"></div>
-        <div id="addNewNoteModal"></div>
+        <div id="addNewNoteModal">
+            <form id="addNoteForm">
+                <label for="formation">Select formation:</label>
+                <select name="formation" id="newNoteFormation">
+                  <!--<option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="19">19</option>-->
+                </select>
+                <br>
+                <label for="noteDescription">Add note:</label>
+                <input type="text" name="noteDescription" class="noteTextfield">
+                <br>
+                <input type="submit" value="Add note">
+                <input type="button" value="Cancel" id="cancelNewNote">
+            </form>
+        </div>
     </body>
 </html>

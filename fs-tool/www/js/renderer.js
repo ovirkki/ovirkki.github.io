@@ -1,33 +1,43 @@
 define(["underscore"], function(_) {
 
     var RANDOMS = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q"];
-    var BLOCKS_AAA = _.range(1, 22).map(convertToString);
+    var BLOCKS_AAA = _.range(1, 23).map(convertToString);
     var BLOCKS_A = [2, 4, 6, 7, 8, 9, 19, 21].map(convertToString);
 
     function convertToString(item) {
         return item.toString();
     }
 
-    function getNoteDataElement(formationData, formationKey) {
-        console.log("get note data for " + formationKey);
-        //var allNotes = formationData[formationKey].notes;
-        console.log("formationData: " + JSON.stringify(formationData));
-        //var $notesTableElement = $("<table></table>").addClass("noteTable").attr("id", "notetable-" + formationKey.toUpperCase());
-        if(_.isEmpty(formationData[formationKey]) || _.isEmpty(formationData[formationKey].notes)) {
-            //return $notesTableElement.addClass("noData");
+    function getAllFormations() {
+        //check checkbox for inter/open
+        var className = $("input[name=classSelector]:checked").val();
+        console.log("Class: " + className);
+        if(className === "open") {
+            return RANDOMS.concat(BLOCKS_AAA);
         } else {
-            var $notesAsTableRows = _.values(formationData[formationKey].notes).map(function(noteData) {
-                return generateNoteTableRow(noteData.freeText);
+            return RANDOMS.concat(BLOCKS_A);
+        }
+    }
+
+    function isInSelectedClass(key) {
+        return _.contains(getAllFormations(), key);
+    }
+
+    function getNoteDataElement(formationData, formationKey) {
+        if(_.isEmpty(formationData[formationKey]) || _.isEmpty(formationData[formationKey].notes)) {
+        } else {
+            var notes = formationData[formationKey].notes;
+            var $notesAsTableRows = _.keys(notes).map(function(noteId) {
+
+                return generateNoteTableRow(noteId, notes[noteId].freeText);
             });
-            //$notesTableElement.append(notesAsTableRows);
-            console.log("SHOW1: " + formationKey);
             $("#row-" + formationKey.toUpperCase()).show();
             return $notesAsTableRows;
         }
     }
 
-    function generateNoteTableRow(noteText) {
-        var noteTableRowElement = $("<tr></tr>");
+    function generateNoteTableRow(id, noteText) {
+        var noteTableRowElement = $("<tr></tr>").attr("id", "noteId-" + id);
         if(noteText === undefined) {
             return "Text not found";
         }
@@ -36,7 +46,7 @@ define(["underscore"], function(_) {
 
     function generateNoteButtons(noteText) {
         var relevanceCheck = ""; //checkpoint
-        var removeButton = $("<button>remove</button>").addClass("noteButton");
+        var removeButton = $("<button>remove</button>").addClass("noteRemoveButton");
         var updateButton = $("<button>update</button>").addClass("noteButton");
         return $("<div></div>").append(updateButton).append(removeButton);
     }
@@ -45,9 +55,13 @@ define(["underscore"], function(_) {
         $(".statusbar").empty();
     }
 
-    function initRows() {
+    function clearData() {
+        $("#dataTable").empty();
+    }
 
-        var formationList = RANDOMS.concat(BLOCKS_A); //TODO select blocks according to checkbox for inter/open
+    function initRows() {
+        clearData();
+        var formationList = RANDOMS.concat(BLOCKS_AAA);
 
         var $formationRows = formationList.map(function(key) {
             var $rowElement = $("<tr></tr>").addClass("formationRow").attr("id", "row-" + key);
@@ -73,9 +87,9 @@ define(["underscore"], function(_) {
 
     function closeModal(event) {
         event.preventDefault();
-        $("#modal").hide();
+        $("#addNewNoteModal").hide();
         $("#overlay").hide();
-        $("#newNoteQuery").empty();
+        $(".noteTextfield").empty();
     }
 
     function generateNewNoteForm() {
@@ -86,9 +100,19 @@ define(["underscore"], function(_) {
         return $form.append($textField, $submit);
     }
 
+    function generateFormationSelection() {
+        $("#newNoteFormation").empty();
+        var formationList = getAllFormations();
+        var $formationElements = formationList.map(function(formationKey) {
+            return $("<option>" + formationKey + "</option>").attr("value", formationKey);
+        });
+        return $("#newNoteFormation").append($formationElements);
+    }
+
     return {
         initialize: function() {
-            initNoteAddModalElements();
+            //initNoteAddModalElements();
+            $(".requiresData").prop( "disabled", true );
         },
 
         initDataTable: function() {
@@ -98,12 +122,15 @@ define(["underscore"], function(_) {
         renderData: function(data) {
             console.log(JSON.stringify(data));
             initRows();
-            _.keys(data).forEach(function(key) {
+            _.keys(data).filter(isInSelectedClass).forEach(function(key) {
                 $("#row-" + key.toUpperCase() + " .noteTable").append(getNoteDataElement(data, key)); //add some check that if row(formation) not in data then it is nodata
             });
+            $(".requiresData").prop( "disabled", false );
         },
-        addNewNote: function(key, text) {
-            $("#notetable-" + key).append(generateNoteTableRow(text));
+        addNewNote: function(key, id, text) {
+            var rowId = "#row-" + key.toUpperCase();
+            $(rowId + " .noteTable").append(generateNoteTableRow(id, text));
+            $(rowId).show();
         },
         updateStatusBar: function(text) {
             clearStatusBar();
@@ -123,9 +150,11 @@ define(["underscore"], function(_) {
             $(".formationRow").show();
         },
         openNoteAddModal: function() {
-            $("#newNoteQuery").append(generateNewNoteForm());
+            generateFormationSelection();
             $("#addNewNoteModal").show();
             $("#overlay").show();
-        }
+        },
+        closeNewNoteModal: closeModal,
+        generateFormationSelection: generateFormationSelection
     };
 });

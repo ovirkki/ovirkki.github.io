@@ -12,6 +12,7 @@ th, td {
     padding: 15px;
 }
 #overlay {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -22,9 +23,20 @@ th, td {
     filter: alpha(opacity=50);
 }
 #addNewNoteModal {
-    position:absolute;
-    background:url(tint20.png) 0 0 repeat;
-    background:rgba(0,0,0,0.2);
-    border-radius:14px;
-    padding:8px;
+    display: none;
+    position: fixed;
+    width: auto;
+    height: auto;
+    background: red;
+    left: 30px;
+    right: 30px;
+    top: 30px;
+    /*background:url(tint20.png) 0 0 repeat;*/
+    background:white;
+    /*border-radius:14px;*/
+    padding:20px;
+    border: 2px solid black
+}
+.noteTextfield {
+    width:100%;
 }
