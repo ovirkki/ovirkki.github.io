@@ -10,8 +10,10 @@ define(["app/databaseIF", "app/renderer", "underscore", "bluebird"], function(da
     }
 
     function getFirstFreeNoteId(notesObject) {
-        var idList = Object.keys(notesObject);
-        return idList.length + 1;
+        var unoccupied = _.findKey(notesObject, function(value) {
+            return value === undefined;
+        });
+        return unoccupied || Object.keys(notesObject).length + 1; //If no empty id, fill
     }
 
     function addNote(key, noteText) {
@@ -32,15 +34,19 @@ define(["app/databaseIF", "app/renderer", "underscore", "bluebird"], function(da
     }
 
     function removeNote(key, noteId) {
+        console.log("REMOVE called: " + key + noteId);
+        console.log("key data: " + JSON.stringify(renderedData[key]));
         if(renderedData[key] === undefined) {
             console.log("ERROR: Tried to remove note from non-existing formation!! Key: " + key + ", id: " + noteId);
             return;
         }
-        if(renderedData[key].notes === undefined || renderedData[key].notes[noteId]) {
+        if(renderedData[key].notes === undefined || renderedData[key].notes[noteId] === undefined) {
             console.log("ERROR: Tried to remove non-existing note!! Key: " + key + ", id: " + noteId);
             return;
         }
+        console.log("Remove note: " + renderedData[key].notes[noteId]);
         renderedData[key].notes[noteId] = undefined;
+        renderer.removeNote(key, noteId);
 
         console.log("renderedData after note removal: " + JSON.stringify(renderedData));
     }
@@ -58,6 +64,7 @@ define(["app/databaseIF", "app/renderer", "underscore", "bluebird"], function(da
 
             })
             .catch(function(err) {
+                console.log(err);
                 renderer.updateStatusBar("Download failed.");
             });
 

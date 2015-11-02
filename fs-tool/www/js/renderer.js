@@ -1,4 +1,4 @@
-define(["underscore"], function(_) {
+define(["underscore", "require"], function(_, require) {
 
     var RANDOMS = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q"];
     var BLOCKS_AAA = _.range(1, 23).map(convertToString);
@@ -11,7 +11,6 @@ define(["underscore"], function(_) {
     function getAllFormations() {
         //check checkbox for inter/open
         var className = $("input[name=classSelector]:checked").val();
-        console.log("Class: " + className);
         if(className === "open") {
             return RANDOMS.concat(BLOCKS_AAA);
         } else {
@@ -29,26 +28,33 @@ define(["underscore"], function(_) {
             var notes = formationData[formationKey].notes;
             var $notesAsTableRows = _.keys(notes).map(function(noteId) {
 
-                return generateNoteTableRow(noteId, notes[noteId].freeText);
+                return generateNoteTableRow(formationKey, noteId, notes[noteId].freeText);
             });
             $("#row-" + formationKey.toUpperCase()).show();
             return $notesAsTableRows;
         }
     }
 
-    function generateNoteTableRow(id, noteText) {
-        var noteTableRowElement = $("<tr></tr>").attr("id", "noteId-" + id);
+    function generateNoteTableRow(key, id, noteText) {
+        var $noteTableRowElement = $("<tr></tr>").attr("id", "noteId-" + id);
         if(noteText === undefined) {
             return "Text not found";
         }
-        return noteTableRowElement.append($("<td>" + noteText + "</td>")).append($("<td></td>").append(generateNoteButtons));
+        return $noteTableRowElement.append($("<td>" + noteText + "</td>")).append($("<td></td>").append(generateNoteButtons(key, id)));
     }
 
-    function generateNoteButtons(noteText) {
+    function generateNoteButtons(key, noteId) {
         var relevanceCheck = ""; //checkpoint
-        var removeButton = $("<button>remove</button>").addClass("noteRemoveButton");
-        var updateButton = $("<button>update</button>").addClass("noteButton");
-        return $("<div></div>").append(updateButton).append(removeButton);
+        var $removeButton = $("<button>remove</button>").addClass("noteRemoveButton");
+        /*$removeButton.click(function(event) {
+            console.log("rem");
+            require("app/dataHandler").removeNote("a",4);
+        });*/
+        $removeButton.data("key", key);
+        $removeButton.data("noteId", noteId);
+        require("app/eventHandler").addListenerForNoteRemoveButton($removeButton, key, noteId);
+        var $updateButton = $("<button>update</button>").addClass("noteButton");
+        return $("<div></div>").append($updateButton).append($removeButton);
     }
 
     function clearStatusBar() {
@@ -66,7 +72,7 @@ define(["underscore"], function(_) {
         var $formationRows = formationList.map(function(key) {
             var $rowElement = $("<tr></tr>").addClass("formationRow").attr("id", "row-" + key);
             $rowElement.append($("<td>" + key.toUpperCase() + "</td>").addClass("formationCode"));
-            var $notesTableElement = $("<table></table>").addClass("noteTable").attr("id", "notetable-" + key);
+            var $notesTableElement = $("<table><tbody></tbody></table>").addClass("noteTable").attr("id", "notetable-" + key);
 
             $rowElement.append($("<td></td>").addClass("noteData").append($notesTableElement));
 
@@ -109,6 +115,17 @@ define(["underscore"], function(_) {
         return $("#newNoteFormation").append($formationElements);
     }
 
+    function isEmptyElement($element) {
+        return $element.children().length === 0;
+    }
+
+    function hideRowIfTableElementisEmpty($tableElement) {
+        console.log("table html: " + $tableElement.html());
+        if(isEmptyElement($tableElement) || $tableElement.html() == "<tbody></tbody>") {
+            $tableElement.closest(".formationRow").hide();
+        }
+    }
+
     return {
         initialize: function() {
             //initNoteAddModalElements();
@@ -129,8 +146,12 @@ define(["underscore"], function(_) {
         },
         addNewNote: function(key, id, text) {
             var rowId = "#row-" + key.toUpperCase();
-            $(rowId + " .noteTable").append(generateNoteTableRow(id, text));
+            $(rowId + " .noteTable").append(generateNoteTableRow(key, id, text));
             $(rowId).show();
+        },
+        removeNote: function(key, id) {
+            $("#row-" + key + " #noteId-" + id).remove();
+            hideRowIfTableElementisEmpty($("#row-" + key + " .noteTable"));
         },
         updateStatusBar: function(text) {
             clearStatusBar();
@@ -141,9 +162,7 @@ define(["underscore"], function(_) {
             console.log("clicked");
 
             $(".noteTable").each(function(index, element) {
-                if($(element).children().length === 0) {
-                    $(element).closest(".formationRow").hide();
-                }
+                hideRowIfTableElementisEmpty($(element));
             });
         },
         unfilterData: function() {

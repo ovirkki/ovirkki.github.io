@@ -25,11 +25,15 @@ define(["app/dataHandler", "app/renderer", "underscore"], function(dataHandler, 
                     renderer.generateFormationSelection();
                 }
             });
-            $(".noteRemoveButton").click(function() {
-                //JOSTAIN SYYSTÄ CLICK EI TOIMI TÄSSÄ!!
-                console.log("remove!");
-                var key = $(this).closest(".formationCode").val();
-                console.log("KEY: " + keyremove);
+        },
+        addListenerForNoteRemoveButton: function($button, key, noteId) {
+            $button.click(function(event) {
+                event.preventDefault();
+                console.log("eventhand remove!: " + $button.data("key") + $button.data("noteId"));
+                //var key = $(this).closest(".formationCode").val();
+                //console.log("button: " + JSON.stringify($button));
+                //console.log("KEY: " + key);
+                dataHandler.removeNote(key, noteId);
             });
             //maybe disable buttons by default and enable here to prevent non respondance at the beginning of page load
         }
