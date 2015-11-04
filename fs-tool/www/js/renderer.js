@@ -35,26 +35,47 @@ define(["underscore", "require"], function(_, require) {
         }
     }
 
+    function getNoteDataElement2(formationData, formationKey) {
+        if(_.isEmpty(formationData[formationKey]) || _.isEmpty(formationData[formationKey].notes)) {
+        } else {
+            var notes = formationData[formationKey].notes;
+            var $noteRows = _.keys(notes).map(function(noteId) {
+                return generateNoteDataRow(formationKey, noteId, notes[noteId].freeText);
+            });
+            $("#row-" + formationKey.toUpperCase()).show();
+            return $noteRows;
+
+        }
+    }
+
+    function generateNoteDataRow(key, id, noteText) {
+        var $mainElement = $("<div></div>").addClass("noteRow").attr("id", "noteId-" + id);
+        if(noteText === undefined) {
+            return "Text not found";
+        }
+        var $noteTextElement = $("<div>" + noteText + "</div>").addClass("noteText");
+        //var $editButtons = $("<div></div>").append(generateNoteButtons(key, id)).addClass("noteEditButtons");
+        var $editButtons = generateNoteButtons(key, id);
+        return $mainElement.append($noteTextElement).append($editButtons);
+    }
+
     function generateNoteTableRow(key, id, noteText) {
         var $noteTableRowElement = $("<tr></tr>").attr("id", "noteId-" + id);
         if(noteText === undefined) {
             return "Text not found";
         }
-        return $noteTableRowElement.append($("<td>" + noteText + "</td>")).append($("<td></td>").append(generateNoteButtons(key, id)));
+        return $noteTableRowElement.append($("<td>" + noteText + "</td>")).append($("<td></td>").addClass("noteButtonCell").append(generateNoteButtons(key, id)));
     }
+
 
     function generateNoteButtons(key, noteId) {
         var relevanceCheck = ""; //checkpoint
-        var $removeButton = $("<button>remove</button>").addClass("noteRemoveButton");
-        /*$removeButton.click(function(event) {
-            console.log("rem");
-            require("app/dataHandler").removeNote("a",4);
-        });*/
+        var $removeButton = $("<button>remove</button>").addClass("noteRemoveButton noteButton");
         $removeButton.data("key", key);
         $removeButton.data("noteId", noteId);
         require("app/eventHandler").addListenerForNoteRemoveButton($removeButton, key, noteId);
         var $updateButton = $("<button>update</button>").addClass("noteButton");
-        return $("<div></div>").append($updateButton).append($removeButton);
+        return $("<div></div>")/*.append($updateButton).append("<br>")*/.append($removeButton).addClass("noteEditButtons");
     }
 
     function clearStatusBar() {
@@ -72,9 +93,9 @@ define(["underscore", "require"], function(_, require) {
         var $formationRows = formationList.map(function(key) {
             var $rowElement = $("<tr></tr>").addClass("formationRow").attr("id", "row-" + key);
             $rowElement.append($("<td>" + key.toUpperCase() + "</td>").addClass("formationCode"));
-            var $notesTableElement = $("<table><tbody></tbody></table>").addClass("noteTable").attr("id", "notetable-" + key);
+            //var $notesTableElement = $("<table><tbody></tbody></table>").addClass("noteTable").attr("id", "notetable-" + key);
 
-            $rowElement.append($("<td></td>").addClass("noteData").append($notesTableElement));
+            $rowElement.append($("<td></td>").append($("<div></div>").addClass("noteCell")));//.append($notesTableElement));
 
             $rowElement.hide();
             return $rowElement;
@@ -119,10 +140,10 @@ define(["underscore", "require"], function(_, require) {
         return $element.children().length === 0;
     }
 
-    function hideRowIfTableElementisEmpty($tableElement) {
-        console.log("table html: " + $tableElement.html());
-        if(isEmptyElement($tableElement) || $tableElement.html() == "<tbody></tbody>") {
-            $tableElement.closest(".formationRow").hide();
+    function hideRowIfTableElementisEmpty($noteElement) {
+        //console.log("table html: " + $tableElement.html());
+        if(isEmptyElement($noteElement)) {
+            $noteElement.closest(".formationRow").hide();
         }
     }
 
@@ -140,18 +161,19 @@ define(["underscore", "require"], function(_, require) {
             console.log(JSON.stringify(data));
             initRows();
             _.keys(data).filter(isInSelectedClass).forEach(function(key) {
-                $("#row-" + key.toUpperCase() + " .noteTable").append(getNoteDataElement(data, key)); //add some check that if row(formation) not in data then it is nodata
+                //$("#row-" + key.toUpperCase() + " .noteTable").append(getNoteDataElement(data, key)); //add some check that if row(formation) not in data then it is nodata
+                $("#row-" + key.toUpperCase() + " .noteCell").append(getNoteDataElement2(data, key));
             });
             $(".requiresData").prop( "disabled", false );
         },
         addNewNote: function(key, id, text) {
             var rowId = "#row-" + key.toUpperCase();
-            $(rowId + " .noteTable").append(generateNoteTableRow(key, id, text));
+            $(rowId + " .noteCell").append(generateNoteDataRow(key, id, text));
             $(rowId).show();
         },
         removeNote: function(key, id) {
             $("#row-" + key + " #noteId-" + id).remove();
-            hideRowIfTableElementisEmpty($("#row-" + key + " .noteTable"));
+            hideRowIfTableElementisEmpty($("#row-" + key + " .noteCell"));
         },
         updateStatusBar: function(text) {
             clearStatusBar();
@@ -161,7 +183,7 @@ define(["underscore", "require"], function(_, require) {
         filterData: function() {
             console.log("clicked");
 
-            $(".noteTable").each(function(index, element) {
+            $(".noteCell").each(function(index, element) {
                 hideRowIfTableElementisEmpty($(element));
             });
         },
