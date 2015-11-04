@@ -28,45 +28,23 @@ define(["underscore", "require"], function(_, require) {
             var notes = formationData[formationKey].notes;
             var $notesAsTableRows = _.keys(notes).map(function(noteId) {
 
-                return generateNoteTableRow(formationKey, noteId, notes[noteId].freeText);
+                return generateNoteListItem(formationKey, noteId, notes[noteId].freeText);
             });
-            $("#row-" + formationKey.toUpperCase()).show();
+            $("#data-" + formationKey.toUpperCase()).show();
             return $notesAsTableRows;
         }
     }
 
-    function getNoteDataElement2(formationData, formationKey) {
-        if(_.isEmpty(formationData[formationKey]) || _.isEmpty(formationData[formationKey].notes)) {
-        } else {
-            var notes = formationData[formationKey].notes;
-            var $noteRows = _.keys(notes).map(function(noteId) {
-                return generateNoteDataRow(formationKey, noteId, notes[noteId].freeText);
-            });
-            $("#row-" + formationKey.toUpperCase()).show();
-            return $noteRows;
-
-        }
-    }
-
-    function generateNoteDataRow(key, id, noteText) {
-        var $mainElement = $("<div></div>").addClass("noteRow").attr("id", "noteId-" + id);
+    function generateNoteListItem(key, id, noteText) {
+        var $listItem = $("<li></li>").addClass("notelistitem").attr("id", "noteId-" + id);
         if(noteText === undefined) {
             return "Text not found";
         }
         var $noteTextElement = $("<div>" + noteText + "</div>").addClass("noteText");
         //var $editButtons = $("<div></div>").append(generateNoteButtons(key, id)).addClass("noteEditButtons");
         var $editButtons = generateNoteButtons(key, id);
-        return $mainElement.append($noteTextElement).append($editButtons);
+        return $listItem.append($noteTextElement);//.append($editButtons);
     }
-
-    function generateNoteTableRow(key, id, noteText) {
-        var $noteTableRowElement = $("<tr></tr>").attr("id", "noteId-" + id);
-        if(noteText === undefined) {
-            return "Text not found";
-        }
-        return $noteTableRowElement.append($("<td>" + noteText + "</td>")).append($("<td></td>").addClass("noteButtonCell").append(generateNoteButtons(key, id)));
-    }
-
 
     function generateNoteButtons(key, noteId) {
         var relevanceCheck = ""; //checkpoint
@@ -83,7 +61,7 @@ define(["underscore", "require"], function(_, require) {
     }
 
     function clearData() {
-        $("#dataTable").empty();
+        $("#contentContainer").empty();
     }
 
     function initRows() {
@@ -91,11 +69,13 @@ define(["underscore", "require"], function(_, require) {
         var formationList = RANDOMS.concat(BLOCKS_AAA);
 
         var $formations = formationList.map(function(key) {
-            var $formationElement = $("<div></div>").attr("data-role", "collapsible").addClass("formationData");
+            var $formationElement = $("<div></div>").attr("data-role", "collapsible").attr("data-collapsed-icon", "arrow-d").attr("data-expanded-icon", "arrow-u");
+            $formationElement.addClass("formationdata").attr("id", "data-" + key);
             var $formationKey = $("<h4>" + key + "</h4>");
-            var $noteList = $("<ul></ul>").attr("data-role", "listview").attr("id", "notelist-" + key);
+            var $noteList = $("<ul></ul>").attr("data-role", "listview").addClass("notelist");
             //$noteList.append("<li>afadf</li>");
-            $formationElement.append($formationKey).append($noteList)
+            $formationElement.append($formationKey).append($noteList);
+            $formationElement.hide();
             return $formationElement;
         });
         $("#contentContainer").append($formations);//.collapsible({theme:'c',refresh:true});
@@ -168,14 +148,13 @@ define(["underscore", "require"], function(_, require) {
             initRows();
             _.keys(data).filter(isInSelectedClass).forEach(function(key) {
                 //$("#row-" + key.toUpperCase() + " .noteTable").append(getNoteDataElement(data, key)); //add some check that if row(formation) not in data then it is nodata
-                $("#row-" + key.toUpperCase() + " .noteCell").append(getNoteDataElement2(data, key));
+                $("#data-" + key.toUpperCase() + " .notelist").append(getNoteDataElement(data, key));
             });
             $(".requiresData").prop( "disabled", false );
         },
         addNewNote: function(key, id, text) {
-            var rowId = "#row-" + key.toUpperCase();
-            $(rowId + " .noteCell").append(generateNoteDataRow(key, id, text));
-            $(rowId).show();
+            $("#data-" + key.toUpperCase() + " .notelist").append(generateNoteListItem(key, id, text));
+            $("#data-" + key.toUpperCase()).show();
         },
         removeNote: function(key, id) {
             $("#row-" + key + " #noteId-" + id).remove();
@@ -197,7 +176,8 @@ define(["underscore", "require"], function(_, require) {
             $(".formationRow").show();
         },
         openNoteAddModal: function() {
-            generateFormationSelection();
+            console.log("ADD");
+            //generateFormationSelection();
             $("#addNewNoteModal").show();
             $("#overlay").show();
         },

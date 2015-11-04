@@ -1,4 +1,4 @@
-define(["app/databaseIF", "app/renderer", "underscore", "bluebird"], function(databaseIF, renderer, _, Promise) {
+define(["app/databaseIF", "app/renderer", "bluebird"], function(databaseIF, renderer, Promise) {
 
     var downloadedData = {};
     var renderedData = {};
@@ -51,22 +51,23 @@ define(["app/databaseIF", "app/renderer", "underscore", "bluebird"], function(da
         console.log("renderedData after note removal: " + JSON.stringify(renderedData));
     }
 
+    function downloadData() {
+        databaseIF.downloadData()
+        .then(function(data) {
+            downloadedData = data;
+            renderedData = deepCloneObject(downloadedData);
+            renderer.renderData(renderedData);
+
+        })
+        .catch(function(err) {
+            console.log(err);
+            renderer.updateStatusBar("Download failed.");
+        });
+    }
+
     return {
-        loadData: function() {
-            databaseIF.downloadData()
-            .then(function(data) {
-                downloadedData = data;
-                renderedData = deepCloneObject(downloadedData);
-                renderer.renderData(renderedData);
-
-            })
-            .then(function() {
-
-            })
-            .catch(function(err) {
-                console.log(err);
-                renderer.updateStatusBar("Download failed.");
-            });
+        initialize: function() {
+            downloadData();
 
         },
         uploadData: function() {

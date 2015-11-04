@@ -13,15 +13,19 @@ requirejs.config({
             exports: "_"
         },
         'jquery.mobile-config': ['jquery'],
-        'jquery.mobile': ['jquery','jquery.mobile-config']
+        'jquery.mobile': ['jquery','jquery.mobile-config'],
         //'jquery.mobile.asyncfilter': ['jquery.mobile'],
+        "app/dataHandler": ["gapiClient"]
     }
 });
 
-requirejs(["jquery", "jquery.mobile", "gapiClient", "app/eventHandler", "app/renderer"],
-    function($, mobile, gapiClient, eventHandler, renderer) {
+requirejs(["jquery", "jquery.mobile", "gapiClient", "app/dataHandler", "app/eventHandler", "app/renderer"],
+    function($, mobile, gapiClient, dataHandler, eventHandler, renderer) {
         $(function(){
-            renderer.initialize();
+            //setTimeout(function() {
+                dataHandler.initialize();
+            //}, 2000);
+            //renderer.initialize();
             eventHandler.initialize();
         });
         /*$(document).ready(function() {

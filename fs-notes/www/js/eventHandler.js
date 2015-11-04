@@ -3,7 +3,7 @@ define(["app/dataHandler", "app/renderer", "underscore"], function(dataHandler, 
     return {
         initialize: function() {
             $("#dataLoad").click(dataHandler.loadData);
-            $("#addNote").click(renderer.openNoteAddModal);
+            $("#addnote").click(renderer.openNoteAddModal);
             $("#dataUpload").click(dataHandler.uploadData);
             $("#dataFiltering").click(function() {
                 if($("#dataFiltering").prop("checked")) {
