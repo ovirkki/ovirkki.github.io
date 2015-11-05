@@ -16,7 +16,7 @@ define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer
             renderer.updateStatusBar("Log in needed");
             return gapi.auth.authorize({
                 client_id: CLIENT_ID, scope: SCOPES, immediate: false
-            })
+            });
         })
         .then(function() {
             renderer.updateStatusBar("Authorization successful");

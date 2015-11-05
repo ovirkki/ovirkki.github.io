@@ -51,6 +51,10 @@ define(["app/databaseIF", "app/renderer", "bluebird"], function(databaseIF, rend
         console.log("renderedData after note removal: " + JSON.stringify(renderedData));
     }
 
+    function updateNote(key, noteId, noteText) {
+        console.log("UPDATE!!");
+    }
+
     function downloadData() {
         databaseIF.downloadData()
         .then(function(data) {
@@ -78,6 +82,7 @@ define(["app/databaseIF", "app/renderer", "bluebird"], function(databaseIF, rend
         },
         addNote: addNote,
         removeNote: removeNote,
+        updateNote: updateNote,
         getRenderedData: function() {
             return renderedData;
         }

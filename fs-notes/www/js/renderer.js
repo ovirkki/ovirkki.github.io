@@ -35,25 +35,16 @@ define(["underscore", "require"], function(_, require) {
         }
     }
 
-    function generateNoteListItem(key, id, noteText) {
-        var $listItem = $("<li></li>").addClass("notelistitem").attr("id", "noteId-" + id);
+    function generateNoteListItem(key, noteId, noteText) {
+        var $listItem = $("<li></li>").addClass("notelistitem").attr("id", "noteId-" + noteId);//.css("display", "inline");
         if(noteText === undefined) {
-            return "Text not found";
+            noteText = "Text not found";
         }
-        var $noteTextElement = $("<div>" + noteText + "</div>").addClass("noteText");
-        //var $editButtons = $("<div></div>").append(generateNoteButtons(key, id)).addClass("noteEditButtons");
-        var $editButtons = generateNoteButtons(key, id);
-        return $listItem.append($noteTextElement);//.append($editButtons);
-    }
-
-    function generateNoteButtons(key, noteId) {
-        var relevanceCheck = ""; //checkpoint
-        var $removeButton = $("<button>remove</button>").addClass("noteRemoveButton noteButton");
-        $removeButton.data("key", key);
-        $removeButton.data("noteId", noteId);
+        var $textField = $('<a href="#"></a>').text(noteText);
+        var $removeButton = $('<a href="#">remove</a>').attr("data-icon", "delete").attr("id", "removeButton");//.addClass("ui-btn ui-btn-inline");
         require("app/eventHandler").addListenerForNoteRemoveButton($removeButton, key, noteId);
-        var $updateButton = $("<button>update</button>").addClass("noteButton");
-        return $("<div></div>")/*.append($updateButton).append("<br>")*/.append($removeButton).addClass("noteEditButtons");
+        require("app/eventHandler").addListenerForNoteUpdateEvent($textField, key, noteId, "Update etxt");//lisää popup, joka hoitaa kutsun
+        return $listItem.append($textField).append($removeButton);
     }
 
     function clearStatusBar() {
@@ -73,6 +64,7 @@ define(["underscore", "require"], function(_, require) {
             $formationElement.addClass("formationdata").attr("id", "data-" + key);
             var $formationKey = $("<h4>" + key + "</h4>");
             var $noteList = $("<ul></ul>").attr("data-role", "listview").addClass("notelist");
+            $noteList.trigger("create");
             //$noteList.append("<li>afadf</li>");
             $formationElement.append($formationKey).append($noteList);
             $formationElement.hide();
@@ -134,9 +126,10 @@ define(["underscore", "require"], function(_, require) {
 
     return {
         initialize: function() {
-            initRows();
+            $(".startsUgly").show();
+            //initRows();
             //initNoteAddModalElements();
-            $(".requiresData").prop( "disabled", true );
+            //$(".requiresData").prop( "disabled", true );
         },
 
         initDataTable: function() {
@@ -149,15 +142,18 @@ define(["underscore", "require"], function(_, require) {
             _.keys(data).filter(isInSelectedClass).forEach(function(key) {
                 //$("#row-" + key.toUpperCase() + " .noteTable").append(getNoteDataElement(data, key)); //add some check that if row(formation) not in data then it is nodata
                 $("#data-" + key.toUpperCase() + " .notelist").append(getNoteDataElement(data, key));
+                //$("#data-" + key.toUpperCase() + " .notelist").listview().listview("refresh");
             });
+            $(".notelist").listview().listview("refresh");
             $(".requiresData").prop( "disabled", false );
         },
         addNewNote: function(key, id, text) {
             $("#data-" + key.toUpperCase() + " .notelist").append(generateNoteListItem(key, id, text));
+            $("#data-" + key.toUpperCase() + " .notelist").listview("refresh");
             $("#data-" + key.toUpperCase()).show();
         },
         removeNote: function(key, id) {
-            $("#row-" + key + " #noteId-" + id).remove();
+            $("#data-" + key + " #noteId-" + id).remove();
             hideRowIfTableElementisEmpty($("#row-" + key + " .noteCell"));
         },
         updateStatusBar: function(text) {
