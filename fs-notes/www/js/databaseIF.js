@@ -1,28 +1,36 @@
-define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer) {
+define(["bluebird"], function(Promise) {
 
     var CLIENT_ID = '709524761846-8htbrhrd9gvt6dkb1m1j13n1hha68b61.apps.googleusercontent.com';
     var SCOPES = ['https://www.googleapis.com/auth/drive'];
     var DATAFILENAME = "fsDataFile.json";
     var FILE_ID = "0B3jVRf_xGpuyTF9KeXBJWEtCSDg";
 
+
+    function updateStatus(text) {
+        //TODO tee joku popup, jossa latausten status ja se sulkeutuu itsestään
+        //clearStatusBar();
+        //$(".statusbar").text(text);
+        console.log("STATUS: " + text);
+    }
+
     function gDriveAuthorize() {
-        renderer.updateStatusBar("Authorizing to database");
+        updateStatus("Authorizing to database");
         return Promise.try(function() {
             return gapi.auth.authorize({
                 client_id: CLIENT_ID, scope: SCOPES, immediate: true
             });
         })
         .catch(function() {
-            renderer.updateStatusBar("Log in needed");
+            updateStatus("Log in needed");
             return gapi.auth.authorize({
                 client_id: CLIENT_ID, scope: SCOPES, immediate: false
             });
         })
         .then(function() {
-            renderer.updateStatusBar("Authorization successful");
+            updateStatus("Authorization successful");
         })
         .catch(function(error) {
-            renderer.updateStatusBar("Authorization failed");
+            updateStatus("Authorization failed");
             console.log("auth failed, error cause: " + error);
             throw error;
         });
@@ -46,7 +54,7 @@ define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer
     }
 
     function downloadDataFromGDrive() {
-        renderer.updateStatusBar("Downloading data");
+        updateStatus("Downloading data");
         return gapi.client.load('drive', 'v2')
         .then(function() {
             var request = gapi.client.request({
@@ -60,7 +68,7 @@ define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer
 
     function uploadDataToGDrive(data) {
         console.log("upload to google drive: " + JSON.stringify(data));
-        renderer.updateStatusBar("Uploading data");
+        updateStatus("Uploading data");
         return gapi.client.load("drive", "v2")
         .then(function() {
             var base64Data = btoa(JSON.stringify(data));
@@ -84,7 +92,11 @@ define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer
                 return downloadDataFromGDrive();
             })
             .tap(function() {
-                renderer.updateStatusBar("Download completed successfully.");
+                updateStatus("Download completed successfully.");
+            })
+            .catch(function(err) {
+                updateStatus("Download failed");
+                console.log(err);
             });
         },
         uploadData: function(data) {
@@ -94,7 +106,11 @@ define(["bluebird", "underscore", "app/renderer"], function(Promise, _, renderer
                 return uploadDataToGDrive(data);
             })
             .tap(function() {
-                renderer.updateStatusBar("Upload completed successfully.");
+                updateStatus("Upload completed successfully.");
+            })
+            .catch(function(err) {
+                updateStatus("Upload failed");
+                console.log(err);
             });
         }
     };

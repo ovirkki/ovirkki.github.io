@@ -1,4 +1,4 @@
-define(["underscore", "require"], function(_, require) {
+define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataHandler) {
 
     var RANDOMS = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q"];
     var BLOCKS_AAA = _.range(1, 23).map(convertToString);
@@ -40,15 +40,23 @@ define(["underscore", "require"], function(_, require) {
         if(noteText === undefined) {
             noteText = "Text not found";
         }
-        var $textField = $('<a href="#"></a>').text(noteText);
-        var $removeButton = $('<a href="#">remove</a>').attr("data-icon", "delete").attr("id", "removeButton");//.addClass("ui-btn ui-btn-inline");
-        require("app/eventHandler").addListenerForNoteRemoveButton($removeButton, key, noteId);
-        require("app/eventHandler").addListenerForNoteUpdateEvent($textField, key, noteId, "Update etxt");//lisää popup, joka hoitaa kutsun
-        return $listItem.append($textField).append($removeButton);
-    }
 
-    function clearStatusBar() {
-        $(".statusbar").empty();
+        var $textField = $('<a href="#"></a>').text(noteText);
+        $textField.bind( "taphold", function(event) {
+            event.preventDefault();
+            dataHandler.updateNote(key, noteId, "testText");
+            $textField.text("testText");
+            //avaa popup form, ehkä yhteinen note addin kanssa
+            //also update textField
+        });
+
+        var $removeButton = $('<a href="#">remove</a>').attr("data-icon", "delete").attr("id", "removeButton");
+        $removeButton.bind( "tap", function(event) {
+            event.preventDefault();
+            dataHandler.removeNote(key, noteId);
+            $listItem.remove();
+        });
+        return $listItem.append($textField).append($removeButton);
     }
 
     function clearData() {
@@ -120,32 +128,51 @@ define(["underscore", "require"], function(_, require) {
         }
     }
 
-    function generateNoteListForFormation(formationKey, noteData) {
+    function initButtonListeners() {
+//pitäisikö kaikissa käyttää jquery mobilen "tap" clickin sijaan?
 
+        $("#dataLoad").click(dataHandler.loadData); //TODO: joku oletko varma-tyylinen varmistus. Vai tarviiko lainkaan?
+        $("#addnote").click(function() {
+            dataHandler.addNote("F", "Code generated text");
+            //renderer.addNewNote("F", 3, "Code generated text");
+        });
+        $("#dataUpload").click(dataHandler.uploadData);
+        /*$("#dataFiltering").click(function() {
+            if($("#dataFiltering").prop("checked")) {
+                filterData();
+            } else {
+                unfilterData();
+            }
+        });*/
+        /*$("#addNoteForm").submit(function(event) {
+            event.preventDefault();
+            dataHandler.addNote($("#newNoteFormation").val(), $(".noteTextfield").val());
+            renderer.closeNewNoteModal(event);
+        });*/
+        //$("#cancelNewNote").click(renderer.closeNewNoteModal);
+        /*$(".classRadio").change(function() {
+            var data = dataHandler.getRenderedData();
+            if(!_.isEmpty(data)) {
+                renderer.renderData(data);
+                renderer.generateFormationSelection();
+            }
+        });*/
     }
+
+
 
     return {
         initialize: function() {
             $(".startsUgly").show();
-            //initRows();
-            //initNoteAddModalElements();
-            //$(".requiresData").prop( "disabled", true );
-        },
-
-        initDataTable: function() {
-            initRows();
-        },
-
-        renderData: function(data) {
-            console.log(JSON.stringify(data));
-            initRows();
-            _.keys(data).filter(isInSelectedClass).forEach(function(key) {
-                //$("#row-" + key.toUpperCase() + " .noteTable").append(getNoteDataElement(data, key)); //add some check that if row(formation) not in data then it is nodata
-                $("#data-" + key.toUpperCase() + " .notelist").append(getNoteDataElement(data, key));
-                //$("#data-" + key.toUpperCase() + " .notelist").listview().listview("refresh");
+            dataHandler.downloadData()
+            .then(function(data) {
+                initRows();
+                _.keys(data).filter(isInSelectedClass).forEach(function(key) {
+                    $("#data-" + key.toUpperCase() + " .notelist").append(getNoteDataElement(data, key));
+                });
+                $(".notelist").listview().listview("refresh");
+                $(".requiresData").prop( "disabled", false );
             });
-            $(".notelist").listview().listview("refresh");
-            $(".requiresData").prop( "disabled", false );
         },
         addNewNote: function(key, id, text) {
             $("#data-" + key.toUpperCase() + " .notelist").append(generateNoteListItem(key, id, text));
@@ -156,11 +183,6 @@ define(["underscore", "require"], function(_, require) {
             $("#data-" + key + " #noteId-" + id).remove();
             hideRowIfTableElementisEmpty($("#row-" + key + " .noteCell"));
         },
-        updateStatusBar: function(text) {
-            clearStatusBar();
-            $(".statusbar").text(text);
-        },
-        clearStatusBar: clearStatusBar,
         filterData: function() {
             console.log("clicked");
 

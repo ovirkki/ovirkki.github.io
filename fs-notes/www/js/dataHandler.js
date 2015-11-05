@@ -1,4 +1,4 @@
-define(["app/databaseIF", "app/renderer", "bluebird"], function(databaseIF, renderer, Promise) {
+define(["app/databaseIF", "bluebird"], function(databaseIF, Promise) {
 
     var downloadedData = {};
     var renderedData = {};
@@ -29,7 +29,6 @@ define(["app/databaseIF", "app/renderer", "bluebird"], function(databaseIF, rend
         renderedData[key].notes[noteId] = {
             freeText: noteText
         };
-        renderer.addNewNote(key, noteId, noteText);
         console.log("renderedData after note add: " + JSON.stringify(renderedData));
     }
 
@@ -46,39 +45,30 @@ define(["app/databaseIF", "app/renderer", "bluebird"], function(databaseIF, rend
         }
         console.log("Remove note: " + renderedData[key].notes[noteId]);
         renderedData[key].notes[noteId] = undefined;
-        renderer.removeNote(key, noteId);
-
         console.log("renderedData after note removal: " + JSON.stringify(renderedData));
     }
 
     function updateNote(key, noteId, noteText) {
         console.log("UPDATE!!");
+        console.log("key: " + key + ", " + noteId + ", " + noteText);
+        renderedData[key].notes[noteId].freeText = noteText;
+        console.log("renderedData after note update: " + JSON.stringify(renderedData));
+
     }
 
     function downloadData() {
-        databaseIF.downloadData()
+        return databaseIF.downloadData()
         .then(function(data) {
             downloadedData = data;
             renderedData = deepCloneObject(downloadedData);
-            renderer.renderData(renderedData);
-
-        })
-        .catch(function(err) {
-            console.log(err);
-            renderer.updateStatusBar("Download failed.");
+            return renderedData;
         });
     }
 
     return {
-        initialize: function() {
-            downloadData();
-
-        },
+        downloadData: downloadData,
         uploadData: function() {
-            databaseIF.uploadData(renderedData)
-            .catch(function() {
-                renderer.updateStatusBar("Upload failed.");
-            });
+            databaseIF.uploadData(renderedData);
         },
         addNote: addNote,
         removeNote: removeNote,
