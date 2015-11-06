@@ -10,7 +10,8 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
 
     function getAllFormations() {
         //check checkbox for inter/open
-        var className = $("input[name=classSelector]:checked").val();
+        //var className = $("input[name=classSelector]:checked").val();
+        var className = "inter";
         if(className === "open") {
             return RANDOMS.concat(BLOCKS_AAA);
         } else {
@@ -64,6 +65,7 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
     }
 
     function initRows() {
+
         clearData();
         var formationList = RANDOMS.concat(BLOCKS_AAA);
 
@@ -80,24 +82,8 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         });
         $("#contentContainer").append($formations);//.collapsible({theme:'c',refresh:true});
         $('div[data-role=collapsible]').collapsible({theme:'c',refresh:true});
-        //$("#contentContainer").trigger("refresh");
+        $("#contentContainer").trigger("refresh");
 
-    }
-
-    function initNoteAddModalElements() {
-        var $content = $('<div id="newNoteQuery"></div>');
-        var $close = $('<a id="close" href="#">close</a>');
-
-        $("#modal").hide();
-        $("#overlay").hide();
-        $("#modal").append($content, $close);
-    }
-
-    function closeModal(event) {
-        event.preventDefault();
-        $("#addNewNoteModal").hide();
-        $("#overlay").hide();
-        $(".noteTextfield").empty();
     }
 
     function generateNewNoteForm() {
@@ -114,7 +100,9 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         var $formationElements = formationList.map(function(formationKey) {
             return $("<option>" + formationKey + "</option>").attr("value", formationKey);
         });
-        return $("#newNoteFormation").append($formationElements);
+        $("#newNoteFormation").append($formationElements);
+        $("#newNoteFormation").val("A");
+        $('select').selectmenu('refresh');
     }
 
     function isEmptyElement($element) {
@@ -133,7 +121,11 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
 
         $("#dataLoad").click(dataHandler.loadData); //TODO: joku oletko varma-tyylinen varmistus. Vai tarviiko lainkaan?
         $("#addnote").click(function() {
-            dataHandler.addNote("F", "Code generated text");
+            generateFormationSelection();
+            $("#noteAddPopup").popup("open", {
+                transition: "fade"
+            });
+            //dataHandler.addNote("F", "Code generated text");
             //renderer.addNewNote("F", 3, "Code generated text");
         });
         $("#dataUpload").click(dataHandler.uploadData);
@@ -144,11 +136,17 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
                 unfilterData();
             }
         });*/
-        /*$("#addNoteForm").submit(function(event) {
+        $("#addNoteForm").submit(function(event) {
             event.preventDefault();
-            dataHandler.addNote($("#newNoteFormation").val(), $(".noteTextfield").val());
-            renderer.closeNewNoteModal(event);
-        });*/
+            var key = $("#newNoteFormation").val();
+            var noteText = $("#noteTextfield").val();
+            dataHandler.addNote(key, noteText);
+            var noteId = dataHandler.getNoteId(key, noteText);
+            $("#data-" + key.toUpperCase() + " .notelist").append(generateNoteListItem(key, noteId, noteText));
+            $("#data-" + key.toUpperCase() + " .notelist").listview("refresh");
+            $("#data-" + key.toUpperCase()).show();
+            $("#noteAddPopup").popup("close");
+        });
         //$("#cancelNewNote").click(renderer.closeNewNoteModal);
         /*$(".classRadio").change(function() {
             var data = dataHandler.getRenderedData();
@@ -164,6 +162,7 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
     return {
         initialize: function() {
             $(".startsUgly").show();
+            initButtonListeners();
             dataHandler.downloadData()
             .then(function(data) {
                 initRows();
@@ -192,14 +191,6 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         },
         unfilterData: function() {
             $(".formationRow").show();
-        },
-        openNoteAddModal: function() {
-            console.log("ADD");
-            //generateFormationSelection();
-            $("#addNewNoteModal").show();
-            $("#overlay").show();
-        },
-        closeNewNoteModal: closeModal,
-        generateFormationSelection: generateFormationSelection
+        }
     };
 });

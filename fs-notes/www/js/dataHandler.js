@@ -73,6 +73,12 @@ define(["app/databaseIF", "bluebird"], function(databaseIF, Promise) {
         addNote: addNote,
         removeNote: removeNote,
         updateNote: updateNote,
+        getNoteId: function(key, noteText) {
+            return _.findKey(renderedData[key].notes, function(value) {
+                return value.freeText === noteText;
+            });
+        },
+
         getRenderedData: function() {
             return renderedData;
         }

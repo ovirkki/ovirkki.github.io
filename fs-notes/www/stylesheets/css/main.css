@@ -1,3 +1,8 @@
 .startsUgly {
     display: none;
 }
+#noteAddPopup-popup {
+    width: 80%;
+    left: auto;
+    right: 0;
+}
