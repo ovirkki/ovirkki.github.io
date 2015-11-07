@@ -42,7 +42,7 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
             noteText = "Text not found";
         }
 
-        var $textField = $('<a href="#"></a>').text(noteText);
+        var $textField = $('<a href="#"></a>').attr("id", "noteText").text(noteText);
         $textField.bind( "taphold", function(event) {
             event.preventDefault();
             dataHandler.updateNote(key, noteId, "testText");

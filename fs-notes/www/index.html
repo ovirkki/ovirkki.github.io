@@ -37,24 +37,27 @@
                     </div>-->
 
                 </div>
-                    <div data-role="popup" id="noteAddPopup" class="ui-content" data-overlay-theme="b">
-                        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
-                        <div data-role="header">
-                            <h2>Add note</h2>
-                        </div>
-                        <div data-role="main" class="ui-content">
-                            <form id="addNoteForm" method="" action="">
-                                <fieldset class="ui-field-contain">
-                                    <label for="formation">Select formation:</label>
-                                    <select name="formation" id="newNoteFormation" data-native-menu="false">
-                                    </select>
-                                </fieldset>
-                                <label for="noteDescription">Add note:</label>
-                                <textarea name="noteDescription" id="noteTextfield" data-clear-btn="true"></textarea>
-                                <input type="submit" data-inline="true" value="Add note" data-icon="check">
-                            </form>
-                        </div>
+                <div data-role="popup" id="loadStatus" class="ui-content" data-overlay-theme="b">
+                    <div id="statustext"></div>
+                </div>
+                <div data-role="popup" id="noteAddPopup" class="ui-content" data-overlay-theme="b">
+                    <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+                    <div data-role="header">
+                        <h2>Add note</h2>
                     </div>
+                    <div data-role="main" class="ui-content">
+                        <form id="addNoteForm" method="" action="">
+                            <fieldset class="ui-field-contain">
+                                <label for="formation">Select formation:</label>
+                                <select name="formation" id="newNoteFormation" data-native-menu="false">
+                                </select>
+                            </fieldset>
+                            <label for="noteDescription">Add note:</label>
+                            <textarea name="noteDescription" id="noteTextfield" data-clear-btn="true"></textarea>
+                            <input type="submit" data-inline="true" value="Add note" data-icon="check">
+                        </form>
+                    </div>
+                </div>
                 <div data-role="footer">
                     <div class="statusbar"></div>
                 </div>

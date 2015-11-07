@@ -1,8 +1,16 @@
+#noteText {
+    white-space:normal;
+    font-size: small
+}
+
 .startsUgly {
     display: none;
 }
 #noteAddPopup-popup {
-    width: 80%;
+    width: 90%;
     left: auto;
     right: 0;
+}
+#loadStatus-popup {
+    text-align: center;
 }

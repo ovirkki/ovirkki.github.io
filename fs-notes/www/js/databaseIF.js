@@ -11,6 +11,7 @@ define(["bluebird"], function(Promise) {
         //clearStatusBar();
         //$(".statusbar").text(text);
         console.log("STATUS: " + text);
+        $("#statustext").text(text);
     }
 
     function gDriveAuthorize() {
@@ -87,12 +88,19 @@ define(["bluebird"], function(Promise) {
 
     return {
         downloadData: function() {
+            $("#loadStatus").popup("open", {
+                transition: "fade"
+            });
             return gDriveAuthorize()
             .then(function() {
                 return downloadDataFromGDrive();
             })
             .tap(function() {
                 updateStatus("Download completed successfully.");
+                setTimeout(function() {
+                    console.log("close status popup");
+                    $("#loadStatus").popup("close");
+                }, 700);
             })
             .catch(function(err) {
                 updateStatus("Download failed");
@@ -100,6 +108,9 @@ define(["bluebird"], function(Promise) {
             });
         },
         uploadData: function(data) {
+            $("#loadStatus").popup("open", {
+                transition: "fade"
+            });
             return gDriveAuthorize()
             .then(function() {
                 console.log("here");
@@ -107,6 +118,10 @@ define(["bluebird"], function(Promise) {
             })
             .tap(function() {
                 updateStatus("Upload completed successfully.");
+                setTimeout(function() {
+                    console.log("close status popup");
+                    $("#loadStatus").popup("close");
+                }, 700);
             })
             .catch(function(err) {
                 updateStatus("Upload failed");

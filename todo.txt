@@ -1,0 +1,10 @@
+TODO:
+- freeze nav bar
+- add notes from key
+- move general add note to "formations", or remove it altogether
+- filtering selection in popup
+  - show all/only ones containing data
+  - filter selected formations (jump)
+- rethink buttons layouyt and required buttons
+- some options?
+*- long note text gets cut if no more room, vhange line
