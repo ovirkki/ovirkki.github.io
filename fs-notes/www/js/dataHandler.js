@@ -44,7 +44,8 @@ define(["app/databaseIF", "bluebird"], function(databaseIF, Promise) {
             return;
         }
         console.log("Remove note: " + renderedData[key].notes[noteId]);
-        renderedData[key].notes[noteId] = undefined;
+        //renderedData[key].notes[noteId] = undefined;
+        delete renderedData[key].notes[noteId];
         console.log("renderedData after note removal: " + JSON.stringify(renderedData));
     }
 
@@ -78,7 +79,14 @@ define(["app/databaseIF", "bluebird"], function(databaseIF, Promise) {
                 return value.freeText === noteText;
             });
         },
-
+        getNoteCount: function(key) {
+            if(renderedData[key] === undefined || _.isEmpty(renderedData[key].notes)) {
+                return 0;
+            } else {
+                console.log("data hand get note count: " + _.keys(renderedData[key].notes).length);
+                return _.keys(renderedData[key].notes).length;
+            }
+        },
         getRenderedData: function() {
             return renderedData;
         }

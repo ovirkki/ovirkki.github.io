@@ -13,10 +13,26 @@
     <body>
         <div class="startsUgly">
             <div data-role="page" id="pageone">
+                <div data-role="panel" id="filteringPanel" data-position-fixed="true">
+                    <h2>Filters</h2>
+                    <form method="" action="">
+                        <fieldset data-role="controlgroup">
+                            <legend>Choose the class:</legend>
+                            <label for="open">AAA (open)</label>
+                            <input type="radio" name="class" id="open" value="open">
+                            <label for="inter">A (intermediate)</label>
+                            <input type="radio" name="class" id="inter" value="inter" checked>
+                        </fieldset>
+                        <label for="filterEmpty">Hide empty data</label>
+                        <input type="checkbox" name="filterEmpty" id="filterEmpty" value="filterEmpty" checked>
+                    </form>
+                </div>
+
                 <div data-role="header">
                     <h1>FS notes</h1>
                     <div data-role="navbar">
                         <ul>
+                            <li><a href="#filteringPanel">Open data filters</a></li>
                             <li><a href="#">Load data</a></li>
                             <li><a href="#" data-rel="popup" id="addnote">Add new Note</a></li>
                             <li><a href="#" id="dataUpload">Save changes</a></li>

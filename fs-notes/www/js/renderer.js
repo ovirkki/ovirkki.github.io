@@ -8,10 +8,16 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         return item.toString();
     }
 
+    function updateNoteCount(key) {
+        var noteCount = dataHandler.getNoteCount(key);
+        console.log("new notecount for " + key + ": " + noteCount);
+        $("#data-" + key).data("noteCount", noteCount);
+    }
+
     function getAllFormations() {
         //check checkbox for inter/open
-        //var className = $("input[name=classSelector]:checked").val();
-        var className = "inter";
+        var className = $("input[name=class]:checked").val();
+        console.log("get all formations, class: " + className);
         if(className === "open") {
             return RANDOMS.concat(BLOCKS_AAA);
         } else {
@@ -70,8 +76,27 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
             event.preventDefault();
             dataHandler.removeNote(key, noteId);
             $listItem.remove();
+            updateNoteCount(key);
+            executeFilters();
         });
         return $listItem.append($textField).append($removeButton);
+    }
+
+    function executeFilters() {
+        console.log("execute filters!!");
+        var formationList = RANDOMS.concat(BLOCKS_AAA);
+        formationList.forEach(function(key) {
+            var $formationElement = $("#data-" + key);
+            if(!isInSelectedClass(key)) {
+                $formationElement.hide();
+                return;
+            }
+            if($("#filterEmpty").prop("checked") && $formationElement.data("noteCount") === 0) {
+                $formationElement.hide();
+                return;
+            }
+            $formationElement.show();
+        });
     }
 
     function clearData() {
@@ -86,11 +111,14 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         var $formations = formationList.map(function(key) {
             var $formationElement = $("<div></div>").attr("data-role", "collapsible").attr("data-collapsed-icon", "arrow-d").attr("data-expanded-icon", "arrow-u");
             $formationElement.addClass("formationdata").attr("id", "data-" + key);
+            $formationElement.data("noteCount", dataHandler.getNoteCount(key));
             var $formationKey = $("<h4>" + key + "</h4>");
             var $noteList = $("<ul></ul>").attr("data-role", "listview").addClass("notelist");
             $noteList.trigger("create");
             $formationElement.append($formationKey).append($noteList);
-            $formationElement.hide();
+            if($("#filterEmpty").prop("checked")) {
+                $formationElement.hide();
+            }
             return $formationElement;
         });
         $("#contentContainer").append($formations);//.collapsible({theme:'c',refresh:true});
@@ -124,9 +152,26 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
 
     function hideRowIfTableElementisEmpty($noteElement) {
         //console.log("table html: " + $tableElement.html());
+        console.log($noteElement);
         if(isEmptyElement($noteElement)) {
-            $noteElement.closest(".formationRow").hide();
+            console.log("isempty!!");
+            $noteElement.closest(".formationData").hide();
         }
+    }
+
+    function hideEmptys() {
+        console.log("hide empty");
+        //NOT WORKING BECAUSE NOTELIST IS ARIA-HIDDEN WHEN NOTES ARE HIDDEN. MAybe add counter anyway in key data about the number of notes?
+        $(".formationdata").each(function(index, element) {
+            console.log("each");
+            if($(element).data("noteCount") === 0) {
+                $(element).hide();
+            }
+            //hideRowIfTableElementisEmpty($(element));
+        });
+    }
+    function showAllData() {
+        $(".formationdata").show();
     }
 
     function initButtonListeners() {
@@ -142,13 +187,7 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
             //renderer.addNewNote("F", 3, "Code generated text");
         });
         $("#dataUpload").click(dataHandler.uploadData);
-        /*$("#dataFiltering").click(function() {
-            if($("#dataFiltering").prop("checked")) {
-                filterData();
-            } else {
-                unfilterData();
-            }
-        });*/
+
         $("#addNoteForm").submit(function(event) {
             event.preventDefault();
             var key = $("#newNoteFormation").val();
@@ -162,25 +201,46 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
             } else {
                 dataHandler.addNote(key, noteText);
                 $("#data-" + key + " .notelist").append(generateNoteListItem(key, noteId, noteText));
+                updateNoteCount(key);
                 console.log("Note added");
             }
             //var noteId = dataHandler.getNoteId(key, noteText);
 
-            $("#data-" + key.toUpperCase() + " .notelist").listview("refresh");
-            $("#data-" + key.toUpperCase()).show();
+            $("#data-" + key + " .notelist").listview("refresh");
+            if(isInSelectedClass(key)) {
+                $("#data-" + key).show();
+            }
             $("#newNoteFormation").prop("disabled", false);
             $("#noteAddPopup").popup("close");
         });
-        /*$(".classRadio").change(function() {
+        $("input[name=class]").change(function() {
+            executeFilters();
+            /*
             var data = dataHandler.getRenderedData();
             if(!_.isEmpty(data)) {
-                renderer.renderData(data);
-                renderer.generateFormationSelection();
-            }
-        });*/
+                renderData(data);
+            }*/
+        });
+        $("#filterEmpty").click(function() {
+            executeFilters();
+            /*
+            if($("#filterEmpty").prop("checked")) {
+                hideEmptys();
+            } else {
+                showAllData();
+            }*/
+        });
     }
 
+    function renderData(data) {
+        initRows();
+        _.keys(data).forEach(function(key) {
+            $("#data-" + key.toUpperCase() + " .notelist").append(getNoteDataElement(data, key));
+        });
+        executeFilters();
+        $(".notelist").listview().listview("refresh");
 
+    }
 
     return {
         initialize: function() {
@@ -188,27 +248,12 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
             initButtonListeners();
             dataHandler.downloadData()
             .then(function(data) {
-                initRows();
-                _.keys(data).filter(isInSelectedClass).forEach(function(key) {
-                    $("#data-" + key.toUpperCase() + " .notelist").append(getNoteDataElement(data, key));
-                });
-                $(".notelist").listview().listview("refresh");
-                $(".requiresData").prop( "disabled", false );
+                renderData(data);
             });
         },
         removeNote: function(key, id) {
             $("#data-" + key + " #noteId-" + id).remove();
             hideRowIfTableElementisEmpty($("#row-" + key + " .noteCell"));
         },
-        filterData: function() {
-            console.log("clicked");
-
-            $(".noteCell").each(function(index, element) {
-                hideRowIfTableElementisEmpty($(element));
-            });
-        },
-        unfilterData: function() {
-            $(".formationRow").show();
-        }
     };
 });
