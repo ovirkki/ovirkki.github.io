@@ -36,6 +36,21 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         }
     }
 
+    function noteUpdateHandler(key, noteId, currentText) {
+        //$("#newNoteFormation-button span").val(key);
+        generateFormationSelection(key);
+        //$("#newNoteFormation").empty();
+        //$("#newNoteFormation").val(key);
+        //$('select').selectmenu('refresh');
+        $("#newNoteFormation").prop("disabled", true);
+        //$("#newNoteFormation").trigger("refresh");
+        $("#noteTextfield").data("noteId", noteId);
+        $("#noteTextfield").val(currentText);
+        $("#noteAddPopup").popup("open", {
+            transition: "fade"
+        });
+    }
+
     function generateNoteListItem(key, noteId, noteText) {
         var $listItem = $("<li></li>").addClass("notelistitem").attr("id", "noteId-" + noteId);//.css("display", "inline");
         if(noteText === undefined) {
@@ -45,14 +60,13 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         var $textField = $('<a href="#"></a>').attr("id", "noteText").text(noteText);
         $textField.bind( "taphold", function(event) {
             event.preventDefault();
-            dataHandler.updateNote(key, noteId, "testText");
-            $textField.text("testText");
+            noteUpdateHandler(key, noteId, noteText);
             //avaa popup form, ehkä yhteinen note addin kanssa
             //also update textField
         });
 
         var $removeButton = $('<a href="#">remove</a>').attr("data-icon", "delete").attr("id", "removeButton");
-        $removeButton.bind( "tap", function(event) {
+        $removeButton.bind("tap", function(event) {
             event.preventDefault();
             dataHandler.removeNote(key, noteId);
             $listItem.remove();
@@ -75,7 +89,6 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
             var $formationKey = $("<h4>" + key + "</h4>");
             var $noteList = $("<ul></ul>").attr("data-role", "listview").addClass("notelist");
             $noteList.trigger("create");
-            //$noteList.append("<li>afadf</li>");
             $formationElement.append($formationKey).append($noteList);
             $formationElement.hide();
             return $formationElement;
@@ -94,14 +107,14 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         return $form.append($textField, $submit);
     }
 
-    function generateFormationSelection() {
+    function generateFormationSelection(formationKey) {
         $("#newNoteFormation").empty();
         var formationList = getAllFormations();
         var $formationElements = formationList.map(function(formationKey) {
             return $("<option>" + formationKey + "</option>").attr("value", formationKey);
         });
         $("#newNoteFormation").append($formationElements);
-        $("#newNoteFormation").val("A");
+        $("#newNoteFormation").val(formationKey || "A");
         $('select').selectmenu('refresh');
     }
 
@@ -140,14 +153,24 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
             event.preventDefault();
             var key = $("#newNoteFormation").val();
             var noteText = $("#noteTextfield").val();
-            dataHandler.addNote(key, noteText);
-            var noteId = dataHandler.getNoteId(key, noteText);
-            $("#data-" + key.toUpperCase() + " .notelist").append(generateNoteListItem(key, noteId, noteText));
+            var noteId = $("#noteTextfield").data("noteId");
+            $("#noteTextfield").removeData("noteId"); // remove to not cause fuzz later
+            if(noteId) {
+                dataHandler.updateNote(key, noteId, noteText);
+                $("#data-" + key + " #noteId-" + noteId + " #noteText").text(noteText);
+                console.log("Note updated");
+            } else {
+                dataHandler.addNote(key, noteText);
+                $("#data-" + key + " .notelist").append(generateNoteListItem(key, noteId, noteText));
+                console.log("Note added");
+            }
+            //var noteId = dataHandler.getNoteId(key, noteText);
+
             $("#data-" + key.toUpperCase() + " .notelist").listview("refresh");
             $("#data-" + key.toUpperCase()).show();
+            $("#newNoteFormation").prop("disabled", false);
             $("#noteAddPopup").popup("close");
         });
-        //$("#cancelNewNote").click(renderer.closeNewNoteModal);
         /*$(".classRadio").change(function() {
             var data = dataHandler.getRenderedData();
             if(!_.isEmpty(data)) {
@@ -172,11 +195,6 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
                 $(".notelist").listview().listview("refresh");
                 $(".requiresData").prop( "disabled", false );
             });
-        },
-        addNewNote: function(key, id, text) {
-            $("#data-" + key.toUpperCase() + " .notelist").append(generateNoteListItem(key, id, text));
-            $("#data-" + key.toUpperCase() + " .notelist").listview("refresh");
-            $("#data-" + key.toUpperCase()).show();
         },
         removeNote: function(key, id) {
             $("#data-" + key + " #noteId-" + id).remove();

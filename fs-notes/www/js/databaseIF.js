@@ -7,10 +7,6 @@ define(["bluebird"], function(Promise) {
 
 
     function updateStatus(text) {
-        //TODO tee joku popup, jossa latausten status ja se sulkeutuu itsestään
-        //clearStatusBar();
-        //$(".statusbar").text(text);
-        console.log("STATUS: " + text);
         $("#statustext").text(text);
     }
 
@@ -98,7 +94,6 @@ define(["bluebird"], function(Promise) {
             .tap(function() {
                 updateStatus("Download completed successfully.");
                 setTimeout(function() {
-                    console.log("close status popup");
                     $("#loadStatus").popup("close");
                 }, 700);
             })
@@ -119,7 +114,6 @@ define(["bluebird"], function(Promise) {
             .tap(function() {
                 updateStatus("Upload completed successfully.");
                 setTimeout(function() {
-                    console.log("close status popup");
                     $("#loadStatus").popup("close");
                 }, 700);
             })

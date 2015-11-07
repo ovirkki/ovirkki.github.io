@@ -8,3 +8,5 @@ TODO:
 - rethink buttons layouyt and required buttons
 - some options?
 *- long note text gets cut if no more room, vhange line
+- update käyttää add note ikkunaa
+- piilota formation ul jos remove tyhjentää sen
