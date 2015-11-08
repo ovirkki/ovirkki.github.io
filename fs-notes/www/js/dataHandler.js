@@ -6,14 +6,14 @@ define(["app/databaseIF", "bluebird"], function(databaseIF, Promise) {
     function deepCloneObject(source) {
         var asString = JSON.stringify(source);
         return JSON.parse(asString);
-        //return JSON.parse(JSON.stringify(source));
     }
 
     function getFirstFreeNoteId(notesObject) {
-        var unoccupied = _.findKey(notesObject, function(value) {
-            return value === undefined;
-        });
-        return unoccupied || Object.keys(notesObject).length + 1; //If no empty id, fill
+        for(var i = 1;true;i++) {
+            if(notesObject[i] === undefined) {
+                return i;
+            }
+        }
     }
 
     function addNote(key, noteText) {
@@ -33,8 +33,6 @@ define(["app/databaseIF", "bluebird"], function(databaseIF, Promise) {
     }
 
     function removeNote(key, noteId) {
-        console.log("REMOVE called: " + key + noteId);
-        console.log("key data: " + JSON.stringify(renderedData[key]));
         if(renderedData[key] === undefined) {
             console.log("ERROR: Tried to remove note from non-existing formation!! Key: " + key + ", id: " + noteId);
             return;
@@ -43,15 +41,12 @@ define(["app/databaseIF", "bluebird"], function(databaseIF, Promise) {
             console.log("ERROR: Tried to remove non-existing note!! Key: " + key + ", id: " + noteId);
             return;
         }
-        console.log("Remove note: " + renderedData[key].notes[noteId]);
-        //renderedData[key].notes[noteId] = undefined;
+        console.log("Remove note, id: " + noteId + ", note text: " + renderedData[key].notes[noteId].freeText);
         delete renderedData[key].notes[noteId];
         console.log("renderedData after note removal: " + JSON.stringify(renderedData));
     }
 
     function updateNote(key, noteId, noteText) {
-        console.log("UPDATE!!");
-        console.log("key: " + key + ", " + noteId + ", " + noteText);
         renderedData[key].notes[noteId].freeText = noteText;
         console.log("renderedData after note update: " + JSON.stringify(renderedData));
 
@@ -83,7 +78,6 @@ define(["app/databaseIF", "bluebird"], function(databaseIF, Promise) {
             if(renderedData[key] === undefined || _.isEmpty(renderedData[key].notes)) {
                 return 0;
             } else {
-                console.log("data hand get note count: " + _.keys(renderedData[key].notes).length);
                 return _.keys(renderedData[key].notes).length;
             }
         },

@@ -12,3 +12,6 @@ TODO:
 *- piilota formation ul jos remove tyhjentää sen
 *- varmistus dialog kun poistetaan note
 - varmistus dialog popup dialogin sijaan? Erona lähinnä, että näkyy data taustalla.
+- Joku indikaatio, että jotain on muutettu eikä tallennettu
+- optionseihin, että kysytäänkö varmistus kun poistetaan notea
+- navbar ei jää napit värjätyiksi

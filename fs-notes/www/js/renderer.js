@@ -12,6 +12,7 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         var noteCount = dataHandler.getNoteCount(key);
         console.log("new notecount for " + key + ": " + noteCount);
         $("#data-" + key).data("noteCount", noteCount);
+        console.log("notecount element: " + $("#data-" + key).data("noteCount"));
     }
 
     function getAllFormations() {
@@ -42,13 +43,8 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
     }
 
     function noteUpdateHandler(key, noteId, currentText) {
-        //$("#newNoteFormation-button span").val(key);
         generateFormationSelection(key);
-        //$("#newNoteFormation").empty();
-        //$("#newNoteFormation").val(key);
-        //$('select').selectmenu('refresh');
         $("#newNoteFormation").prop("disabled", true);
-        //$("#newNoteFormation").trigger("refresh");
         $("#noteTextfield").data("noteId", noteId);
         $("#noteTextfield").val(currentText);
         $("#noteAddPopup").popup("open", {
@@ -57,6 +53,7 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
     }
 
     function generateNoteListItem(key, noteId, noteText) {
+        console.log("gen li with noteId: " + noteId);
         var $listItem = $("<li></li>").addClass("notelistitem").attr("id", "noteId-" + noteId);//.css("display", "inline");
         if(noteText === undefined) {
             noteText = "Text not found";
@@ -66,11 +63,9 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         $textField.bind( "taphold", function(event) {
             event.preventDefault();
             noteUpdateHandler(key, noteId, noteText);
-            //avaa popup form, ehkä yhteinen note addin kanssa
-            //also update textField
         });
 
-        var $removeButton = $('<a href="#">remove</a>').attr("data-icon", "delete").attr("id", "removeButton");
+        var $removeButton = $('<a href="#">remove</a>').attr("data-icon", "delete").attr("id", "removeButton-" + noteId);
         $removeButton.bind("tap", function(event) {
             $("#confirmText").text("Are you sure you want to remove this note: \"" + noteText + "\"");
             $.mobile.changePage('#confirmDialog');
@@ -78,6 +73,8 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
                 $("#confirmDialog").dialog("close");
                 event.preventDefault();
                 dataHandler.removeNote(key, noteId);
+                $removeButton.unbind("tap");
+                $("#confirmButton").unbind();
                 $listItem.remove();
                 updateNoteCount(key);
                 executeFilters();
@@ -164,21 +161,6 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         }
     }
 
-    function hideEmptys() {
-        console.log("hide empty");
-        //NOT WORKING BECAUSE NOTELIST IS ARIA-HIDDEN WHEN NOTES ARE HIDDEN. MAybe add counter anyway in key data about the number of notes?
-        $(".formationdata").each(function(index, element) {
-            console.log("each");
-            if($(element).data("noteCount") === 0) {
-                $(element).hide();
-            }
-            //hideRowIfTableElementisEmpty($(element));
-        });
-    }
-    function showAllData() {
-        $(".formationdata").show();
-    }
-
     function initButtonListeners() {
 //pitäisikö kaikissa käyttää jquery mobilen "tap" clickin sijaan?
         $("#confirmDialog").dialog();
@@ -186,18 +168,17 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
             $("#confirmDialog").dialog("close");
         });
         $("#dataLoad").click(function() {
-            //$.mobile.changePage('#confirmDialog', 'pop', true, true);
-            //$("#confirmDialog").dialog();
             $("#confirmText").text("Reloading data will lose unsaved changes. Are you sure you want to reload?");
-            $.mobile.changePage('#confirmDialog'/*, {transition: 'pop', role: 'dialog'}*/);
+            $.mobile.changePage('#confirmDialog');
             $("#confirmButton").click(function() {
                 $("#confirmDialog").dialog("close");
-                //$("#confirmDialog").close();
                 handleDataLoad();
+                $("#confirmButton").unbind();
             });
         });
         $("#addnote").click(function() {
             generateFormationSelection();
+            $("#noteTextfield").val("");
             $("#noteAddPopup").popup("open", {
                 transition: "fade"
             });
@@ -216,11 +197,12 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
                 console.log("Note updated");
             } else {
                 dataHandler.addNote(key, noteText);
+                noteId = dataHandler.getNoteId(key, noteText);
                 $("#data-" + key + " .notelist").append(generateNoteListItem(key, noteId, noteText));
                 updateNoteCount(key);
+                $("#contentContainer").trigger("refresh");
                 console.log("Note added");
             }
-            //var noteId = dataHandler.getNoteId(key, noteText);
 
             $("#data-" + key + " .notelist").listview("refresh");
             if(isInSelectedClass(key)) {
@@ -231,20 +213,9 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         });
         $("input[name=class]").change(function() {
             executeFilters();
-            /*
-            var data = dataHandler.getRenderedData();
-            if(!_.isEmpty(data)) {
-                renderData(data);
-            }*/
         });
         $("#filterEmpty").click(function() {
             executeFilters();
-            /*
-            if($("#filterEmpty").prop("checked")) {
-                hideEmptys();
-            } else {
-                showAllData();
-            }*/
         });
     }
 
@@ -270,10 +241,6 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
             $(".startsUgly").show();
             initButtonListeners();
             handleDataLoad();
-        },
-        removeNote: function(key, id) {
-            $("#data-" + key + " #noteId-" + id).remove();
-            hideRowIfTableElementisEmpty($("#row-" + key + " .noteCell"));
-        },
+        }
     };
 });
