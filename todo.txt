@@ -1,13 +1,14 @@
 TODO:
-- freeze nav bar
-- add notes from key
+*- freeze nav bar
+(- add notes from key)
 - move general add note to "formations", or remove it altogether
 - filtering selection in panel/popup
-  - show all/only ones containing data
+  *- show all/only ones containing data
   - filter selected formations (jump)
-- rethink buttons layouyt and required buttons
+*- rethink buttons layouyt and required buttons
 - some options?
 *- long note text gets cut if no more room, vhange line
-- update käyttää add note ikkunaa
-- piilota formation ul jos remove tyhjentää sen
-- varmistus dialog kun poistetaan note
+*- update käyttää add note ikkunaa
+*- piilota formation ul jos remove tyhjentää sen
+*- varmistus dialog kun poistetaan note
+- varmistus dialog popup dialogin sijaan? Erona lähinnä, että näkyy data taustalla.
