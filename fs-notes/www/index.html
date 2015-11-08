@@ -12,7 +12,7 @@
     </head>
     <body>
         <div class="startsUgly">
-            <div data-role="page" id="pageone">
+            <div data-role="page" id="mainPage">
                 <div data-role="panel" id="filteringPanel" data-position-fixed="true">
                     <h2>Filters</h2>
                     <form method="" action="">
@@ -28,13 +28,14 @@
                     </form>
                 </div>
 
-                <div data-role="header">
+                <div data-role="header" data-position="fixed">
                     <h1>FS notes</h1>
+                    <a href="#filteringPanel" data-icon="gear">Preferences</a>
                     <div data-role="navbar">
                         <ul>
-                            <li><a href="#filteringPanel">Open data filters</a></li>
-                            <li><a href="#">Load data</a></li>
-                            <li><a href="#" data-rel="popup" id="addnote">Add new Note</a></li>
+                            <!--<li><a href="#filteringPanel">Open data filters</a></li>-->
+                            <li><a href="#" id="dataLoad">Reload data</a></li>
+                            <!--<li><a href="#" data-rel="popup" id="addnote">Add new Note</a></li>-->
                             <li><a href="#" id="dataUpload">Save changes</a></li>
                         </ul>
                     </div>
@@ -42,16 +43,8 @@
                 </div>
 
                 <div data-role="main" class="ui-content">
-                <h2>Formations</h2>
+                <a href="#" data-role="button" data-inline="true" id="addnote" data-icon="plus">Add new note</a>
                 <div id="contentContainer"></div>
-                    <!--<div data-role="collapsible">
-                    <h4>X</h4>
-                    <ul data-role="listview">
-                        <li><a href="#">Adele</a></li>
-                        <li><a href="#">Agnes</a></li>
-                    </ul>
-                    </div>-->
-
                 </div>
                 <div data-role="popup" id="loadStatus" class="ui-content" data-overlay-theme="b">
                     <div id="statustext"></div>
@@ -76,6 +69,18 @@
                 </div>
                 <div data-role="footer">
                     <div class="statusbar"></div>
+                </div>
+            </div>
+            <!--<div data-role="page" data-dialog="true" id="confirmDialog">-->
+            <div data-role="page" id="confirmDialog">
+                <div data-role="header">
+                    <h1>Confirm</h1>
+                </div>
+
+                <div data-role="main" class="ui-content">
+                    <p id="confirmText"></p>
+                    <a href="#" id="confirmButton" data-role="button" data-inline="true">Yes</a>
+                    <a href="#" id="confirmCancel" data-role="button" data-inline="true">Cancel</a>
                 </div>
             </div>
         </div>

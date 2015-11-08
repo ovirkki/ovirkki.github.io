@@ -17,7 +17,6 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
     function getAllFormations() {
         //check checkbox for inter/open
         var className = $("input[name=class]:checked").val();
-        console.log("get all formations, class: " + className);
         if(className === "open") {
             return RANDOMS.concat(BLOCKS_AAA);
         } else {
@@ -73,11 +72,16 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
 
         var $removeButton = $('<a href="#">remove</a>').attr("data-icon", "delete").attr("id", "removeButton");
         $removeButton.bind("tap", function(event) {
-            event.preventDefault();
-            dataHandler.removeNote(key, noteId);
-            $listItem.remove();
-            updateNoteCount(key);
-            executeFilters();
+            $("#confirmText").text("Are you sure you want to remove this note: \"" + noteText + "\"");
+            $.mobile.changePage('#confirmDialog');
+            $("#confirmButton").click(function() {
+                $("#confirmDialog").dialog("close");
+                event.preventDefault();
+                dataHandler.removeNote(key, noteId);
+                $listItem.remove();
+                updateNoteCount(key);
+                executeFilters();
+            });
         });
         return $listItem.append($textField).append($removeButton);
     }
@@ -116,6 +120,7 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
             var $noteList = $("<ul></ul>").attr("data-role", "listview").addClass("notelist");
             $noteList.trigger("create");
             $formationElement.append($formationKey).append($noteList);
+            //var $addNoteButton = $('<a href="#">Add</a>').attr("data-icon", "plus").attr("id", "addNoteButton");
             if($("#filterEmpty").prop("checked")) {
                 $formationElement.hide();
             }
@@ -176,15 +181,26 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
 
     function initButtonListeners() {
 //pitäisikö kaikissa käyttää jquery mobilen "tap" clickin sijaan?
-
-        $("#dataLoad").click(dataHandler.loadData); //TODO: joku oletko varma-tyylinen varmistus. Vai tarviiko lainkaan?
+        $("#confirmDialog").dialog();
+        $("#confirmCancel").click(function() {
+            $("#confirmDialog").dialog("close");
+        });
+        $("#dataLoad").click(function() {
+            //$.mobile.changePage('#confirmDialog', 'pop', true, true);
+            //$("#confirmDialog").dialog();
+            $("#confirmText").text("Reloading data will lose unsaved changes. Are you sure you want to reload?");
+            $.mobile.changePage('#confirmDialog'/*, {transition: 'pop', role: 'dialog'}*/);
+            $("#confirmButton").click(function() {
+                $("#confirmDialog").dialog("close");
+                //$("#confirmDialog").close();
+                handleDataLoad();
+            });
+        });
         $("#addnote").click(function() {
             generateFormationSelection();
             $("#noteAddPopup").popup("open", {
                 transition: "fade"
             });
-            //dataHandler.addNote("F", "Code generated text");
-            //renderer.addNewNote("F", 3, "Code generated text");
         });
         $("#dataUpload").click(dataHandler.uploadData);
 
@@ -242,14 +258,18 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
 
     }
 
+    function handleDataLoad() {
+        dataHandler.downloadData()
+        .then(function(data) {
+            renderData(data);
+        });
+    }
+
     return {
         initialize: function() {
             $(".startsUgly").show();
             initButtonListeners();
-            dataHandler.downloadData()
-            .then(function(data) {
-                renderData(data);
-            });
+            handleDataLoad();
         },
         removeNote: function(key, id) {
             $("#data-" + key + " #noteId-" + id).remove();
