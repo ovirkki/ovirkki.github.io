@@ -18,7 +18,6 @@ define(["app/databaseIF", "bluebird"], function(databaseIF, Promise) {
 
     function addNote(key, noteText) {
         console.log("Add note for " + key + ": " + noteText);
-        key = key.toUpperCase();
         if(renderedData[key] === undefined) {
             renderedData[key] = {};
         }
