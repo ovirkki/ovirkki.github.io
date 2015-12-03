@@ -3,6 +3,9 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
     var RANDOMS = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q"];
     var BLOCKS_AAA = _.range(1, 23).map(convertToString);
     var BLOCKS_A = [2, 4, 6, 7, 8, 9, 19, 21].map(convertToString);
+    var PERSONS = ["Otto", "Saara", "Antti", "Heidi"];
+
+    var ALL_DATA = RANDOMS.concat(BLOCKS_AAA).concat(PERSONS);
 
     function convertToString(item) {
         return item.toString();
@@ -19,9 +22,9 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         //check checkbox for inter/open
         var className = $("input[name=class]:checked").val();
         if(className === "open") {
-            return RANDOMS.concat(BLOCKS_AAA);
+            return RANDOMS.concat(BLOCKS_AAA).concat(ALL_DATA);
         } else {
-            return RANDOMS.concat(BLOCKS_A);
+            return RANDOMS.concat(BLOCKS_A).concat(ALL_DATA);
         }
     }
 
@@ -85,8 +88,7 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
 
     function executeFilters() {
         console.log("execute filters!!");
-        var formationList = RANDOMS.concat(BLOCKS_AAA);
-        formationList.forEach(function(key) {
+        ALL_DATA.forEach(function(key) {
             var $formationElement = $("#data-" + key);
             if(!isInSelectedClass(key)) {
                 $formationElement.hide();
@@ -107,9 +109,8 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
     function initRows() {
 
         clearData();
-        var formationList = RANDOMS.concat(BLOCKS_AAA);
 
-        var $formations = formationList.map(function(key) {
+        var $formations = ALL_DATA.map(function(key) {
             var $formationElement = $("<div></div>").attr("data-role", "collapsible").attr("data-collapsed-icon", "arrow-d").attr("data-expanded-icon", "arrow-u");
             $formationElement.addClass("formationdata").attr("id", "data-" + key);
             $formationElement.data("noteCount", dataHandler.getNoteCount(key));
