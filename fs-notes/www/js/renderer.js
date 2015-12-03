@@ -22,9 +22,9 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         //check checkbox for inter/open
         var className = $("input[name=class]:checked").val();
         if(className === "open") {
-            return RANDOMS.concat(BLOCKS_AAA, ALL_DATA);
+            return RANDOMS.concat(BLOCKS_AAA, PERSONS);
         } else {
-            return RANDOMS.concat(BLOCKS_A, ALL_DATA);
+            return RANDOMS.concat(BLOCKS_A, PERSONS);
         }
     }
 
