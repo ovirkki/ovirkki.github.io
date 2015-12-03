@@ -5,7 +5,7 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
     var BLOCKS_A = [2, 4, 6, 7, 8, 9, 19, 21].map(convertToString);
     var PERSONS = ["Otto", "Saara", "Antti", "Heidi"];
 
-    var ALL_DATA = RANDOMS.concat(BLOCKS_AAA).concat(PERSONS);
+    var ALL_DATA = RANDOMS.concat(BLOCKS_AAA, PERSONS);
 
     function convertToString(item) {
         return item.toString();
@@ -22,9 +22,9 @@ define(["bluebird", "underscore", "app/dataHandler"], function(Promise, _, dataH
         //check checkbox for inter/open
         var className = $("input[name=class]:checked").val();
         if(className === "open") {
-            return RANDOMS.concat(BLOCKS_AAA).concat(ALL_DATA);
+            return RANDOMS.concat(BLOCKS_AAA, ALL_DATA);
         } else {
-            return RANDOMS.concat(BLOCKS_A).concat(ALL_DATA);
+            return RANDOMS.concat(BLOCKS_A, ALL_DATA);
         }
     }
 
