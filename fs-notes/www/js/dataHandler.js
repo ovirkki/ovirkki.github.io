@@ -54,6 +54,7 @@ define(["app/databaseIF", "bluebird"], function(databaseIF, Promise) {
     function downloadData() {
         return databaseIF.downloadData()
         .then(function(data) {
+            console.log("Data: " + JSON.stringify(data));
             downloadedData = data;
             renderedData = deepCloneObject(downloadedData);
             return renderedData;
